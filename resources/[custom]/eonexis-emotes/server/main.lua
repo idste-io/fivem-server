@@ -1,0 +1,1 @@
+-- eonexis-emotes — server (minimal; emotes are fully client-side)

@@ -16,17 +16,22 @@
     <!-- HOME SCREEN -->
     <div id="home-screen" class="app-screen active">
       <div class="wallpaper-logo">EONEXIS</div>
-      <div class="app-grid">
-        <button class="app-icon" onclick="openApp('spawn')">   <div class="icon">🪂</div><div class="lbl">Spawn</div>      </button>
-        <button class="app-icon" onclick="openApp('bank')">    <div class="icon">💰</div><div class="lbl">Bank</div>       </button>
-        <button class="app-icon" onclick="openApp('jobs')">    <div class="icon">💼</div><div class="lbl">Jobs</div>       </button>
-        <button class="app-icon" onclick="openApp('players')"> <div class="icon">👥</div><div class="lbl">Players</div>    </button>
-        <button class="app-icon" onclick="openApp('inv')">     <div class="icon">📦</div><div class="lbl">Inventory</div> </button>
-        <button class="app-icon" onclick="openApp('gps')">     <div class="icon">🗺️</div><div class="lbl">GPS</div>        </button>
+      <div class="app-grid" id="app-grid">
+        <!-- Core apps always visible -->
+        <button class="app-icon" onclick="openApp('spawn')">    <div class="icon">🪂</div><div class="lbl">Spawn</div>      </button>
+        <button class="app-icon" onclick="openApp('bank')">     <div class="icon">💰</div><div class="lbl">Bank</div>       </button>
+        <button class="app-icon" onclick="openApp('jobboard')"> <div class="icon">💼</div><div class="lbl">Jobs</div>       </button>
+        <button class="app-icon" onclick="openApp('players')">  <div class="icon">👥</div><div class="lbl">Players</div>    </button>
+        <button class="app-icon" onclick="openApp('inv')">      <div class="icon">📦</div><div class="lbl">Inventory</div> </button>
+        <button class="app-icon" onclick="openApp('gps')">      <div class="icon">🗺️</div><div class="lbl">GPS</div>        </button>
         <button class="app-icon" onclick="openApp('character')"><div class="icon">🧑</div><div class="lbl">Character</div></button>
-        <button class="app-icon" onclick="openApp('quests')">  <div class="icon">📜</div><div class="lbl">Quests</div>    </button>
-        <button class="app-icon" onclick="openApp('stats')">   <div class="icon">📊</div><div class="lbl">Stats</div>     </button>
-        <button id="admin-app-btn" class="app-icon hidden" onclick="openApp('adminpanel')"><div class="icon">🛡️</div><div class="lbl">Admin</div></button>
+        <button class="app-icon" onclick="openApp('quests')">   <div class="icon">📜</div><div class="lbl">Quests</div>    </button>
+        <button class="app-icon" onclick="openApp('stats')">    <div class="icon">📊</div><div class="lbl">Stats</div>     </button>
+        <!-- Job-specific apps (hidden unless on that job) -->
+        <button id="app-work-btn" class="app-icon hidden" onclick="openApp('work')">       <div class="icon">⚒️</div><div class="lbl">Work</div>       </button>
+        <button id="app-police-btn" class="app-icon hidden" onclick="openApp('policeapp')"><div class="icon">🚔</div><div class="lbl">Police</div>     </button>
+        <!-- Admin (admin-only) -->
+        <button id="admin-app-btn" class="app-icon hidden" onclick="openApp('adminpanel')"><div class="icon">🛡️</div><div class="lbl">Admin</div>      </button>
       </div>
       <button class="close-phone" onclick="post('close')">✕ Close</button>
     </div>
@@ -51,13 +56,49 @@
       </div>
     </div>
 
-    <!-- JOBS APP -->
-    <div id="app-jobs" class="app-screen">
-      <div class="app-bar"><button onclick="goHome()">←</button><h3>Jobs</h3></div>
+    <!-- JOB BOARD APP -->
+    <div id="app-jobboard" class="app-screen">
+      <div class="app-bar"><button onclick="goHome()">←</button><h3>Job Board</h3></div>
+      <div class="tab-row">
+        <button class="tab-btn active" onclick="switchJobTab('listing')">All Jobs</button>
+        <button class="tab-btn" onclick="switchJobTab('licenses')">Licenses</button>
+      </div>
       <div class="app-body">
-        <div class="bank-row"><span>Current Job</span><strong id="j-current">unemployed</strong></div>
+        <div id="jb-current-row" class="bank-row" style="margin-bottom:10px">
+          <span>Current Job</span><strong id="j-current">unemployed</strong>
+        </div>
+        <!-- Listing tab -->
+        <div id="jb-listing" class="jb-tab active">
+          <div id="job-list"></div>
+        </div>
+        <!-- Licenses tab -->
+        <div id="jb-licenses" class="jb-tab hidden">
+          <div id="license-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WORK APP (visible when employed, not police) -->
+    <div id="app-work" class="app-screen">
+      <div class="app-bar"><button onclick="goHome()">←</button><h3 id="work-app-title">Work</h3></div>
+      <div class="app-body">
+        <div class="bank-row"><span>Job</span><strong id="w-job">—</strong></div>
+        <div class="bank-row" style="align-items:flex-start"><span>Status</span><span id="w-status" style="text-align:right;font-size:12px;max-width:65%;opacity:.8">No active task</span></div>
         <button class="full-btn" onclick="post('requestWork')">▶ Get Next Task</button>
-        <p class="hint">Visit the Job Center (yellow marker) to change jobs.</p>
+        <button class="full-btn secondary" onclick="doQuitJob()">🚪 Quit Job</button>
+        <p class="hint">Complete tasks to earn money and skill XP.</p>
+      </div>
+    </div>
+
+    <!-- POLICE APP (police job only) -->
+    <div id="app-policeapp" class="app-screen">
+      <div class="app-bar"><button onclick="goHome()">←</button><h3>Police</h3></div>
+      <div class="app-body">
+        <div class="bank-row"><span>Status</span><strong id="police-duty-status">Off Duty</strong></div>
+        <button class="full-btn" onclick="post('toggleDuty')" id="duty-toggle-btn">▶ Go On Duty</button>
+        <button class="full-btn secondary" onclick="goHome(); post('close')">📻 Open Radio (/radio)</button>
+        <button class="full-btn secondary" onclick="post('view911Log')">🚨 911 Log</button>
+        <p class="hint">Use /cuff /jail /911 /radio in-game.</p>
       </div>
     </div>
 
@@ -109,7 +150,7 @@
     <!-- STATS APP -->
     <div id="app-stats" class="app-screen">
       <div class="app-bar"><button onclick="goHome()">←</button><h3>My Stats</h3></div>
-      <div class="app-body" id="stats-body">
+      <div class="app-body">
         <div class="bank-row"><span>Cash</span><strong id="stat-cash">—</strong></div>
         <div class="bank-row"><span>Bank</span><strong id="stat-bank">—</strong></div>
         <div class="bank-row"><span>Job</span><strong id="stat-job">—</strong></div>
@@ -117,7 +158,7 @@
       </div>
     </div>
 
-    <!-- ADMIN APP (admin-only, hidden for regular players) -->
+    <!-- ADMIN APP -->
     <div id="app-adminpanel" class="app-screen">
       <div class="app-bar"><button onclick="goHome()">←</button><h3>Admin Panel</h3></div>
       <div class="app-body">

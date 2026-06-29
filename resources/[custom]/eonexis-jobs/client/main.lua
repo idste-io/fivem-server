@@ -382,3 +382,45 @@ RegisterCommand('work', function()
 end, false)
 
 TriggerEvent('chat:addSuggestion', '/work', 'Get your next job task', {})
+
+-- ── Client exports for eonexis-phone ─────────────────────────────────────────
+
+exports('getJobDefs', function()
+    -- Return serialisable copy (no vectors) for phone NUI
+    local defs = {}
+    for _, j in ipairs(Config.Jobs) do
+        table.insert(defs, {
+            id      = j.id,
+            label   = j.label,
+            icon    = j.icon,
+            desc    = j.desc,
+            pay     = j.pay,
+            license = j.license,
+        })
+    end
+    return defs
+end)
+
+exports('getLicenseDefs', function()
+    local defs = {}
+    for _, l in ipairs(Config.Licenses) do
+        table.insert(defs, {
+            id    = l.id,
+            label = l.label,
+            cost  = l.cost,
+            desc  = l.desc,
+        })
+    end
+    return defs
+end)
+
+exports('getJobCenterPos', function()
+    return { x=Config.JobCenterPos.x, y=Config.JobCenterPos.y, z=Config.JobCenterPos.z }
+end)
+
+exports('getLicensePos', function(licId)
+    for _, l in ipairs(Config.Licenses) do
+        if l.id == licId then return { x=l.pos.x, y=l.pos.y, z=l.pos.z } end
+    end
+    return nil
+end)

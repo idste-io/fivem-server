@@ -1,0 +1,53 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: transparent; font-family: 'Segoe UI', sans-serif; color: #eee; }
+.hidden { display: none; }
+#app { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999; }
+.panel {
+  background: rgba(15, 10, 30, 0.96);
+  border: 1px solid rgba(255,140,0,0.35);
+  border-radius: 12px;
+  width: 400px;
+  max-height: 520px;
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.title { font-size: 1.1rem; font-weight: 700; color: #fb923c; letter-spacing: 2px; }
+.close-btn { background: none; border: none; color: #888; font-size: 1.1rem; cursor: pointer; }
+.close-btn:hover { color: #f87171; }
+.recipes { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; padding-right: 4px; }
+.recipes::-webkit-scrollbar { width: 4px; }
+.recipes::-webkit-scrollbar-thumb { background: rgba(255,140,0,0.3); border-radius: 2px; }
+.recipe-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  transition: border-color .15s;
+}
+.recipe-card.can-craft { border-color: rgba(74,222,128,0.3); }
+.recipe-card.cannot-craft { opacity: 0.5; }
+.recipe-info { flex: 1; }
+.recipe-name { font-weight: 600; font-size: 0.95rem; }
+.recipe-ing { font-size: 0.75rem; color: #999; margin-top: 3px; }
+.recipe-time { font-size: 0.75rem; color: #fb923c; margin-top: 2px; }
+.craft-btn {
+  padding: 6px 14px;
+  border-radius: 7px;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity .15s;
+}
+.craft-btn.active { background: linear-gradient(135deg, #f97316, #fb923c); color: #000; }
+.craft-btn.active:hover { opacity: 0.85; }
+.craft-btn.inactive { background: rgba(255,255,255,0.07); color: #666; cursor: not-allowed; }

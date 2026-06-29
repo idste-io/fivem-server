@@ -1,0 +1,29 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: transparent; font-family: 'Segoe UI', sans-serif; color: #eee; }
+.hidden { display: none; }
+#app { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999; }
+.panel {
+  background: rgba(15, 10, 30, 0.96);
+  border: 1px solid rgba(147, 82, 219, 0.4);
+  border-radius: 12px;
+  width: 340px;
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+}
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.title { font-size: 1.1rem; font-weight: 700; color: #9352db; letter-spacing: 2px; }
+.close-btn { background: none; border: none; color: #888; font-size: 1.1rem; cursor: pointer; }
+.close-btn:hover { color: #f87171; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.tab { padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.78rem;
+  background: rgba(255,255,255,0.07); color: #aaa; border: 1px solid transparent; transition: all .15s; }
+.tab.active { background: rgba(147,82,219,0.25); color: #c084fc; border-color: rgba(147,82,219,0.5); }
+.controls { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.controls span { font-size: 0.9rem; color: #ddd; min-width: 100px; text-align: center; }
+.btn { padding: 7px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: opacity .15s; }
+.btn:hover { opacity: 0.85; }
+.btn.primary  { background: linear-gradient(135deg, #7c3aed, #9352db); color: #fff; }
+.btn.secondary { background: rgba(255,255,255,0.1); color: #ccc; }
+.btn.danger   { background: rgba(248,113,113,0.2); color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
+.footer { display: flex; gap: 10px; margin-top: 16px; }
+.footer .btn { flex: 1; }

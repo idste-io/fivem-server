@@ -1,6 +1,6 @@
-let state = { cash: 0, bank: 0, job: 'unemployed' };
-let spawnLocs = [];
-let gpsLocs = [];
+'use strict';
+let state = { cash: 0, bank: 0, job: 'unemployed', licenses: [], isAdmin: false, isPolice: false, dutyOn: false };
+let spawnLocs = [], gpsLocs = [], allJobs = [], allLicenses = [];
 
 function post(action, data) {
     fetch('https://eonexis-phone/' + action, {
@@ -14,38 +14,153 @@ function post(action, data) {
 setInterval(() => {
     const d = new Date();
     document.getElementById('clock').textContent =
-        d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+        d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
 }, 1000);
 
 function openApp(name) {
     document.querySelectorAll('.app-screen').forEach(el => el.classList.remove('active'));
     document.getElementById('home-screen').classList.remove('active');
-
     const el = document.getElementById('app-' + name);
     if (el) el.classList.add('active');
-
+    // App-specific init
     if (name === 'bank') {
         document.getElementById('b-cash').textContent = '$' + state.cash.toLocaleString();
         document.getElementById('b-bank').textContent = '$' + state.bank.toLocaleString();
     }
-    if (name === 'jobs') {
-        document.getElementById('j-current').textContent = state.job;
+    if (name === 'jobboard') {
+        renderJobBoard();
     }
-    if (name === 'players') {
-        post('getPlayers');
+    if (name === 'work') {
+        document.getElementById('w-job').textContent = state.job || 'unemployed';
+        const jobDef = allJobs.find(j => j.id === state.job);
+        document.getElementById('work-app-title').textContent = jobDef ? (jobDef.icon + ' ' + jobDef.label) : 'Work';
     }
-    if (name === 'gps') {
-        renderGPS();
+    if (name === 'policeapp') {
+        updateDutyUI();
     }
-    if (name === 'stats') {
-        post('getStats');
-    }
+    if (name === 'players') post('getPlayers');
+    if (name === 'gps') renderGPS();
+    if (name === 'stats') post('getStats');
 }
 
 function goHome() {
     document.querySelectorAll('.app-screen').forEach(el => el.classList.remove('active'));
     document.getElementById('home-screen').classList.add('active');
 }
+
+// ── Job board ─────────────────────────────────────────────────────────────────
+
+function switchJobTab(tab) {
+    document.querySelectorAll('.jb-tab').forEach(t => t.classList.add('hidden'));
+    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+    document.getElementById('jb-' + tab).classList.remove('hidden');
+    event.target.classList.add('active');
+}
+
+function renderJobBoard() {
+    document.getElementById('j-current').textContent = state.job || 'unemployed';
+    renderJobList();
+    renderLicenseList();
+}
+
+function renderJobList() {
+    const el = document.getElementById('job-list');
+    if (!allJobs.length) { el.innerHTML = '<p class="hint">Loading jobs...</p>'; return; }
+    el.innerHTML = allJobs.map(j => {
+        const isCurrent = j.id === state.job;
+        const licReq = j.license;
+        const hasLic = !licReq || state.licenses.includes(licReq);
+        const licDef = licReq ? allLicenses.find(l => l.id === licReq) : null;
+
+        let btn = '';
+        if (isCurrent) {
+            btn = `<button class="job-btn active-job" disabled>✔ Active</button>`;
+        } else if (!hasLic && licDef) {
+            btn = `<button class="job-btn need-lic" onclick="waypointToLicense('${licDef.id}')">📍 Get ${licDef.label}</button>`;
+        } else {
+            btn = `<button class="job-btn apply-btn" onclick="applyJob('${j.id}')">Apply</button>`;
+        }
+        return `<div class="job-card ${isCurrent ? 'current' : ''}">
+          <div class="job-head">
+            <span class="job-icon">${j.icon || '💼'}</span>
+            <span class="job-name">${j.label}</span>
+            <span class="job-pay">$${j.pay.min}–$${j.pay.max}</span>
+          </div>
+          <div class="job-desc">${j.desc || ''}</div>
+          ${licReq ? `<div class="job-lic ${hasLic ? 'ok' : 'missing'}">🪪 ${licDef ? licDef.label : licReq} ${hasLic ? '✓' : '✗'}</div>` : ''}
+          <div class="job-actions">${btn}</div>
+        </div>`;
+    }).join('');
+}
+
+function renderLicenseList() {
+    const el = document.getElementById('license-list');
+    if (!allLicenses.length) { el.innerHTML = '<p class="hint">Loading...</p>'; return; }
+    el.innerHTML = allLicenses.map(l => {
+        const owned = state.licenses.includes(l.id);
+        return `<div class="lic-card ${owned ? 'owned' : ''}">
+          <div class="lic-name">${l.label}</div>
+          <div class="lic-meta">Cost: $${l.cost.toLocaleString()} • ${l.desc || ''}</div>
+          ${owned
+            ? '<div class="lic-status owned-badge">✔ Owned</div>'
+            : `<button class="job-btn need-lic" onclick="waypointToLicense('${l.id}')">📍 Directions</button>`}
+        </div>`;
+    }).join('');
+}
+
+function applyJob(jobId) {
+    post('applyJob', { jobId });
+    // Close phone so player can walk to job center
+    setTimeout(() => post('close'), 300);
+}
+
+function doQuitJob() {
+    post('quitJob');
+    goHome();
+}
+
+function waypointToLicense(licId) {
+    post('waypointToLicense', { licId });
+    setTimeout(() => post('close'), 300);
+}
+
+// ── Police app ────────────────────────────────────────────────────────────────
+
+function updateDutyUI() {
+    const btn = document.getElementById('duty-toggle-btn');
+    const status = document.getElementById('police-duty-status');
+    if (state.dutyOn) {
+        status.textContent = '🟢 On Duty';
+        btn.textContent = '⏹ Go Off Duty';
+    } else {
+        status.textContent = '🔴 Off Duty';
+        btn.textContent = '▶ Go On Duty';
+    }
+}
+
+// ── App visibility based on job ───────────────────────────────────────────────
+
+function refreshJobApps() {
+    const job = state.job;
+    const isPolice = job === 'police';
+    const isEmployed = job && job !== 'unemployed';
+    const isAdmin = state.isAdmin;
+
+    // Work app: visible when employed and not police
+    document.getElementById('app-work-btn').classList.toggle('hidden', !isEmployed || isPolice);
+    // Police app: only for police job
+    document.getElementById('app-police-btn').classList.toggle('hidden', !isPolice);
+    // Admin: admin-only
+    document.getElementById('admin-app-btn').classList.toggle('hidden', !isAdmin);
+
+    // If admin, unhide everything
+    if (isAdmin) {
+        document.getElementById('app-work-btn').classList.remove('hidden');
+        document.getElementById('app-police-btn').classList.remove('hidden');
+    }
+}
+
+// ── Misc ──────────────────────────────────────────────────────────────────────
 
 function renderSpawn(locs) {
     const el = document.getElementById('spawn-list');
@@ -80,15 +195,21 @@ function setWaypoint(x, y) {
     post('close');
 }
 
-function doChute(id)  { post('spawnParachute', { id }); }
-function doTaxi(id)   { post('spawnBuilding',  { id }); }
-function doDeposit()  { const a = document.getElementById('txAmount').value; post('deposit',  { amount: parseInt(a) }); }
-function doWithdraw() { const a = document.getElementById('txAmount').value; post('withdraw', { amount: parseInt(a) }); }
+function doChute(id)   { post('spawnParachute', { id }); }
+function doTaxi(id)    { post('spawnBuilding',  { id }); }
+function doDeposit()   { const a = document.getElementById('txAmount').value; post('deposit',  { amount: parseInt(a) }); }
+function doWithdraw()  { const a = document.getElementById('txAmount').value; post('withdraw', { amount: parseInt(a) }); }
+
+// ── Message handler ───────────────────────────────────────────────────────────
 
 window.addEventListener('message', function(e) {
     const d = e.data;
     if (d.action === 'open') {
-        state = { cash: d.cash, bank: d.bank, job: d.job };
+        state.cash = d.cash; state.bank = d.bank; state.job = d.job;
+        state.licenses = d.licenses || []; state.isAdmin = !!d.isAdmin; state.dutyOn = !!d.dutyOn;
+        if (d.jobs)     allJobs = d.jobs;
+        if (d.licDefs)  allLicenses = d.licDefs;
+        refreshJobApps();
         document.getElementById('phone').classList.remove('hidden');
         goHome();
     } else if (d.action === 'close') {
@@ -97,9 +218,13 @@ window.addEventListener('message', function(e) {
         state.cash = d.cash; state.bank = d.bank;
         document.getElementById('b-cash').textContent = '$' + d.cash.toLocaleString();
         document.getElementById('b-bank').textContent = '$' + d.bank.toLocaleString();
+    } else if (d.action === 'updateJob') {
+        state.job = d.job;
+        state.licenses = d.licenses || state.licenses;
+        state.dutyOn = false;
+        refreshJobApps();
     } else if (d.action === 'setSpawnLocs') {
-        spawnLocs = d.locs;
-        renderSpawn(d.locs);
+        spawnLocs = d.locs; renderSpawn(d.locs);
     } else if (d.action === 'setGPSLocs') {
         gpsLocs = d.locs;
     } else if (d.action === 'showPlayers') {
@@ -120,7 +245,12 @@ window.addEventListener('message', function(e) {
         document.getElementById('stat-job').textContent   = d.job  || 'Unemployed';
         document.getElementById('stat-skill').textContent = 'Level ' + (d.skill || 1);
     } else if (d.action === 'setAdmin') {
-        const btn = document.getElementById('admin-app-btn');
-        if (btn) btn.classList.toggle('hidden', !d.isAdmin);
+        state.isAdmin = !!d.isAdmin;
+        refreshJobApps();
+    } else if (d.action === 'setDuty') {
+        state.dutyOn = !!d.dutyOn;
+        updateDutyUI();
+    } else if (d.action === 'setWorkStatus') {
+        document.getElementById('w-status').textContent = d.status || 'No active task';
     }
 });

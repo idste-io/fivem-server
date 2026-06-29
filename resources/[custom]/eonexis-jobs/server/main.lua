@@ -236,9 +236,29 @@ AddEventHandler('eonexis-jobs:taskDone', function()
     TriggerEvent('eonexis-skilltree:taskDone', src)
 end)
 
--- Export: check if player has license (used by other mods)
+-- Exports for other mods
 exports('hasLicense', function(src, licId)
     return hasLicense(src, licId)
+end)
+
+exports('getLicensesForPlayer', function(src)
+    return licenseData[getPlayerId(src)] or {}
+end)
+
+-- Pending job selection (from phone applyJob)
+local pendingJob = {}  -- { [src] = jobId }
+
+RegisterNetEvent('eonexis-jobs:pendingJobSelect')
+AddEventHandler('eonexis-jobs:pendingJobSelect', function(jobId)
+    pendingJob[source] = jobId
+end)
+
+exports('getPendingJob', function(src)
+    return pendingJob[src]
+end)
+
+exports('clearPendingJob', function(src)
+    pendingJob[src] = nil
 end)
 
 AddEventHandler('playerDropped', function()

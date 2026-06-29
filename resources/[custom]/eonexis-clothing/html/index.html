@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Wardrobe</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app" class="hidden">
+  <div class="panel">
+    <div class="header">
+      <span class="title">👕 WARDROBE</span>
+      <button class="close-btn" onclick="close_()">✕</button>
+    </div>
+    <div class="tabs" id="tabs"></div>
+    <div class="controls">
+      <button class="btn secondary" onclick="prevDrawable()">◀</button>
+      <span id="drawLabel">Drawable 0</span>
+      <button class="btn secondary" onclick="nextDrawable()">▶</button>
+    </div>
+    <div class="controls">
+      <button class="btn secondary" onclick="prevTexture()">◀</button>
+      <span id="texLabel">Texture 0</span>
+      <button class="btn secondary" onclick="nextTexture()">▶</button>
+    </div>
+    <div class="footer">
+      <button class="btn primary" onclick="save()">✔ Save Outfit</button>
+      <button class="btn danger" onclick="close_()">Cancel</button>
+    </div>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

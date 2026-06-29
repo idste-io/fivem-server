@@ -5,6 +5,9 @@ local activeApp  = nil
 local cash       = 0
 local bank       = 0
 local job        = 'unemployed'
+local myLicenses = {}
+local isAdmin    = false
+local dutyOn     = false
 
 local function notify(msg, t)
     if exports['eonexis-notify'] then
@@ -25,11 +28,33 @@ local function sendGPSLocs()
     if ok and locs then SendNUIMessage({ action='setGPSLocs', locs=locs }) end
 end
 
+local function getJobDefs()
+    local ok, defs = pcall(function() return exports['eonexis-jobs']:getJobDefs() end)
+    if ok and defs then return defs end
+    return {}
+end
+
+local function getLicenseDefs()
+    local ok, defs = pcall(function() return exports['eonexis-jobs']:getLicenseDefs() end)
+    if ok and defs then return defs end
+    return {}
+end
+
 local function openPhone()
     if phoneOpen then return end
     phoneOpen = true
     SetNuiFocus(true, true)
-    SendNUIMessage({ action='open', cash=cash, bank=bank, job=job })
+    SendNUIMessage({
+        action   = 'open',
+        cash     = cash,
+        bank     = bank,
+        job      = job,
+        licenses = myLicenses,
+        isAdmin  = isAdmin,
+        dutyOn   = dutyOn,
+        jobs     = getJobDefs(),
+        licDefs  = getLicenseDefs(),
+    })
     sendSpawnLocs()
     sendGPSLocs()
 end
@@ -77,7 +102,24 @@ AddEventHandler('eonexis-economy:updateBank', function(v)
 end)
 
 RegisterNetEvent('eonexis-economy:updateJob')
-AddEventHandler('eonexis-economy:updateJob', function(v) job = v end)
+AddEventHandler('eonexis-economy:updateJob', function(v)
+    job = v
+    if phoneOpen then SendNUIMessage({ action='updateJob', job=v, licenses=myLicenses }) end
+end)
+
+-- License updates from jobs mod
+RegisterNetEvent('eonexis-jobs:licenseGranted')
+AddEventHandler('eonexis-jobs:licenseGranted', function(licId)
+    local found = false
+    for _, l in ipairs(myLicenses) do if l == licId then found = true; break end end
+    if not found then table.insert(myLicenses, licId) end
+    if phoneOpen then SendNUIMessage({ action='updateJob', job=job, licenses=myLicenses }) end
+end)
+
+RegisterNetEvent('eonexis-jobs:setLicenses')
+AddEventHandler('eonexis-jobs:setLicenses', function(lics)
+    myLicenses = lics or {}
+end)
 
 RegisterNetEvent('eonexis-economy:receiveData')
 AddEventHandler('eonexis-economy:receiveData', function(d)
@@ -103,7 +145,50 @@ end)
 RegisterNUICallback('requestWork', function(_, cb)
     cb({})
     closePhone()
-    TriggerServerEvent('eonexis-jobs:requestTask', job)
+    TriggerServerEvent('eonexis-jobs:requestTask')
+end)
+
+RegisterNUICallback('quitJob', function(_, cb)
+    cb({})
+    TriggerNetEvent('eonexis-jobs:quitJob')
+    closePhone()
+end)
+
+-- Apply for a job via phone — waypoint to job center
+RegisterNUICallback('applyJob', function(data, cb)
+    cb({})
+    closePhone()
+    -- Set waypoint to job center and pre-select the job when player gets there
+    local ok, jpos = pcall(function() return exports['eonexis-jobs']:getJobCenterPos() end)
+    if ok and jpos then
+        local u = jpos.x / 8192.0 + 0.5
+        local v = jpos.y / 8192.0 * -1.0 + 0.5
+        SetNewWaypoint(u, v)
+    end
+    -- Tell jobs mod to auto-select this job when player arrives at job center
+    TriggerServerEvent('eonexis-jobs:pendingJobSelect', data.jobId)
+    exports['eonexis-notify']:Notify('Jobs', 'Head to the Job Center (yellow marker) to start!', 'info', 5000)
+end)
+
+-- Waypoint to license office
+RegisterNUICallback('waypointToLicense', function(data, cb)
+    cb({})
+    closePhone()
+    local ok, lpos = pcall(function() return exports['eonexis-jobs']:getLicensePos(data.licId) end)
+    if ok and lpos then
+        local u = lpos.x / 8192.0 + 0.5
+        local v = lpos.y / 8192.0 * -1.0 + 0.5
+        SetNewWaypoint(u, v)
+        exports['eonexis-notify']:Notify('License Office', 'Head to the marker to purchase your license.', 'info', 5000)
+    end
+end)
+
+-- Police duty toggle from phone
+RegisterNUICallback('toggleDuty', function(_, cb)
+    cb({})
+    TriggerNetEvent('eonexis-police:setDuty', not dutyOn)
+    dutyOn = not dutyOn
+    SendNUIMessage({ action='setDuty', dutyOn=dutyOn })
 end)
 
 RegisterNUICallback('openInventory', function(_, cb)

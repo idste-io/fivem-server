@@ -1,7 +1,22 @@
 -- eonexis-admintools — server
 
-local bannedLicenses = {}
+local bannedLicenses = {}   -- { [license] = { reason, by, at } }
 local persistentAdmins = {}  -- { [license] = playerName }
+local BANS_FILE = 'data/bans.json'
+
+local function loadBans()
+    local raw = LoadResourceFile(GetCurrentResourceName(), BANS_FILE)
+    if raw and #raw > 2 then
+        local ok, parsed = pcall(json.decode, raw)
+        if ok and parsed then bannedLicenses = parsed end
+    end
+end
+
+local function saveBans()
+    SaveResourceFile(GetCurrentResourceName(), BANS_FILE, json.encode(bannedLicenses), -1)
+end
+
+loadBans()
 
 local function loadAdmins()
     local raw = LoadResourceFile(GetCurrentResourceName(), Config.AdminDataFile)
@@ -88,8 +103,11 @@ RegisterCommand('ban', function(src, args)
     local target = findPlayer(args[1])
     if not target then notify(src, 'Player not found.', 'error'); return end
     local license = getIdentifier(target)
-    if license then bannedLicenses[license] = true end
     local reason = table.concat(args, ' ', 2) ~= '' and table.concat(args, ' ', 2) or 'Banned by admin'
+    if license then
+        bannedLicenses[license] = { reason=reason, by=GetPlayerName(src), at=os.date('%Y-%m-%d %H:%M:%S') }
+        saveBans()
+    end
     DropPlayer(target, '[BANNED] ' .. reason)
     notify(src, 'Banned ' .. (GetPlayerName(target) or '?'), 'success')
     print('[eonexis-admintools] Banned: ' .. tostring(license) .. ' — ' .. reason)
@@ -102,7 +120,9 @@ AddEventHandler('playerConnecting', function(_, _, deferrals)
     Wait(0)
     local license = GetPlayerIdentifierByType(src, 'license') or GetPlayerIdentifier(src, 0)
     if license and bannedLicenses[license] then
-        deferrals.done('You are banned from this server.')
+        local ban = bannedLicenses[license]
+        local msg = type(ban) == 'table' and ('You are banned: ' .. ban.reason) or 'You are banned from this server.'
+        deferrals.done(msg)
     else
         deferrals.done()
     end

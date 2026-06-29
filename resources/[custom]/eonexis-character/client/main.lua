@@ -90,9 +90,14 @@ end)
 RegisterNUICallback('closeCharacter', function(_, cb)
     cb({})
     if isFirstTime then
-        -- Can't close without creating a character first time
-        SendNUIMessage({ action = 'showError', msg = 'You must create a character to play.' })
-        return
+        -- Allow skipping: auto-create a default character so the player is never trapped
+        isFirstTime = false
+        TriggerServerEvent('eonexis-character:save', {
+            name   = GetPlayerName(PlayerId()),
+            gender = 'male',
+            outfit = 'basic_m',
+            bio    = '',
+        })
     end
     closeNUI()
 end)

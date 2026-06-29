@@ -57,8 +57,8 @@ CreateThread(function()
         local ped  = PlayerPedId()
         local pos  = GetEntityCoords(ped)
 
-        -- AFK detection (foot + vehicle)
-        if Config.AfkKick.enabled then
+        -- AFK detection (foot + vehicle) — skip while a NUI menu has focus
+        if Config.AfkKick.enabled and not IsNuiFocused() then
             local moved = #(pos - lastPos) > 0.5
             local input = IsControlPressed(0, 30) or IsControlPressed(0, 31) or  -- W/S
                           IsControlPressed(0, 34) or IsControlPressed(0, 35) or  -- A/D
@@ -78,6 +78,10 @@ CreateThread(function()
                 TriggerServerEvent('eonexis-smallresources:afkKick')
                 lastMoveMs = GetGameTimer()  -- prevent spam
             end
+        elseif IsNuiFocused() then
+            -- keep the AFK timer fresh while a menu is open
+            lastMoveMs = GetGameTimer()
+            afkWarned  = false
         end
         lastPos = pos
 

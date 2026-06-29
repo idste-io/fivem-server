@@ -37,6 +37,9 @@ function openApp(name) {
     if (name === 'gps') {
         renderGPS();
     }
+    if (name === 'stats') {
+        post('getStats');
+    }
 }
 
 function goHome() {
@@ -104,7 +107,20 @@ window.addEventListener('message', function(e) {
         el.innerHTML = d.players.map(p =>
             `<div class="player-row"><span class="player-id">[${p.id}]</span> ${p.name}</div>`
         ).join('') || '<p class="hint">No players online.</p>';
+    } else if (d.action === 'setCharData') {
+        if (d.char) {
+            document.getElementById('char-name-ph').textContent   = d.char.name   || '—';
+            document.getElementById('char-gender-ph').textContent = d.char.gender  ? (d.char.gender.charAt(0).toUpperCase() + d.char.gender.slice(1)) : '—';
+            document.getElementById('char-outfit-ph').textContent = d.char.outfit  || '—';
+            document.getElementById('char-bio-ph').textContent    = d.char.bio     || '—';
+        }
+    } else if (d.action === 'setStats') {
+        document.getElementById('stat-cash').textContent  = '$' + (d.cash || 0).toLocaleString();
+        document.getElementById('stat-bank').textContent  = '$' + (d.bank || 0).toLocaleString();
+        document.getElementById('stat-job').textContent   = d.job  || 'Unemployed';
+        document.getElementById('stat-skill').textContent = 'Level ' + (d.skill || 1);
+    } else if (d.action === 'setAdmin') {
+        const btn = document.getElementById('admin-app-btn');
+        if (btn) btn.classList.toggle('hidden', !d.isAdmin);
     }
 });
-
-// Send spawn locs on open — populated by Lua when it sends setSpawnLocs

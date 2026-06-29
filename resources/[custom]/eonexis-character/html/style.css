@@ -1,0 +1,121 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --primary: hsl(258,85%,65%);
+  --primary-dim: hsl(258,85%,55%);
+  --bg: hsl(240,15%,6%);
+  --surface: hsl(240,12%,10%);
+  --surface2: hsl(240,10%,13%);
+  --border: hsl(240,10%,18%);
+  --text: hsl(240,5%,92%);
+  --muted: hsl(240,5%,55%);
+  --red: hsl(0,80%,65%);
+  --green: hsl(142,70%,55%);
+}
+html, body { height: 100%; width: 100%; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
+body { background: transparent; }
+
+#overlay {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(4px);
+}
+#overlay.hidden { display: none; }
+
+.panel {
+  width: 680px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 0 60px rgba(147,82,219,0.2), 0 20px 60px rgba(0,0,0,0.6);
+}
+
+.header {
+  padding: 18px 24px 14px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, hsl(258,85%,10%/0.5) 0%, var(--bg) 100%);
+}
+.logo {
+  font-size: 11px; font-weight: 700; letter-spacing: 3px;
+  color: var(--primary); text-transform: uppercase; margin-bottom: 4px;
+}
+.subtitle { font-size: 18px; font-weight: 600; color: var(--text); }
+
+.error-bar {
+  background: hsl(0,70%,20%); border-bottom: 1px solid hsl(0,70%,35%);
+  color: var(--red); font-size: 13px; padding: 10px 24px;
+}
+.error-bar.hidden { display: none; }
+
+.body { display: flex; gap: 0; }
+
+.form-col {
+  flex: 1; padding: 20px 24px;
+  border-right: 1px solid var(--border);
+}
+.outfit-col { width: 220px; padding: 20px; }
+
+.section-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 2px;
+  color: var(--primary); text-transform: uppercase; margin-bottom: 14px;
+}
+.field-label {
+  display: block; font-size: 11px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; margin-top: 14px;
+}
+.optional { font-weight: 400; text-transform: none; letter-spacing: 0; }
+.field-input, .field-textarea {
+  width: 100%; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text); font-size: 13px; padding: 9px 12px;
+  outline: none; transition: border-color 0.2s;
+}
+.field-input:focus, .field-textarea:focus { border-color: var(--primary); }
+.field-textarea { height: 70px; resize: none; font-family: inherit; }
+
+.gender-row { display: flex; gap: 8px; }
+.gender-btn {
+  flex: 1; padding: 8px 0; border-radius: 8px; font-size: 13px; font-weight: 500;
+  border: 1px solid var(--border); background: var(--surface); color: var(--muted);
+  cursor: pointer; transition: all 0.15s;
+}
+.gender-btn:hover { border-color: var(--primary); color: var(--primary); }
+.gender-btn.active { border-color: var(--primary); background: hsl(258,85%,20%); color: var(--primary); }
+
+.outfit-list { display: flex; flex-direction: column; gap: 6px; }
+.outfit-item {
+  padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--surface); cursor: pointer; transition: all 0.15s;
+}
+.outfit-item:hover { border-color: var(--primary); }
+.outfit-item.selected { border-color: var(--primary); background: hsl(258,85%,15%); }
+.outfit-name { font-size: 12px; color: var(--text); font-weight: 500; }
+.outfit-price { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+#outfit-price {
+  margin-top: 10px; font-size: 11px; color: var(--green);
+  min-height: 16px;
+}
+
+.footer {
+  padding: 14px 24px; border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface);
+}
+.cost-info { font-size: 12px; color: var(--muted); }
+.cost-info.hidden { display: none; }
+.footer-btns { display: flex; gap: 10px; margin-left: auto; }
+
+.btn-cancel {
+  padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 500;
+  border: 1px solid var(--border); background: transparent; color: var(--muted);
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-cancel:hover { border-color: var(--muted); color: var(--text); }
+
+.btn-save {
+  padding: 9px 24px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  border: none; background: var(--primary); color: white;
+  cursor: pointer; transition: opacity 0.15s;
+}
+.btn-save:hover { opacity: 0.85; }

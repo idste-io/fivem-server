@@ -3,14 +3,11 @@
 local cooldowns = {}  -- src → last spin timestamp (os.time())
 
 local function getIdentifier(src)
-    local ids = GetPlayerIdentifiers(src)
-    for _, id in ipairs(ids) do
-        if id:sub(1,6) == 'steam:' then return id end
-    end
-    for _, id in ipairs(ids) do
-        if id:sub(1,3) == 'ip:' then return id end
-    end
-    return tostring(src)
+    local lic = GetPlayerIdentifierByType(src, 'license')
+    if lic and lic ~= '' then return lic end
+    local steam = GetPlayerIdentifierByType(src, 'steam')
+    if steam and steam ~= '' then return steam end
+    return GetPlayerIdentifier(src, 0) or tostring(src)
 end
 
 local function weightedRandom()

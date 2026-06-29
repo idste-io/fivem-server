@@ -181,10 +181,91 @@ AddEventHandler('eonexis-phone:open', function()
 end)
 
 -- On open, send GPS blips from gps mod
-local function sendGPSLocs()
+local function sendGPSLocs2()
     local ok, locs = pcall(function() return exports['eonexis-gps']:getGPSLocations() end)
     if ok and locs then
         SendNUIMessage({ action='setGPSLocs', locs=locs })
     end
+end
+
+-- ── Character App ─────────────────────────────────────────────────────────────
+
+local function sendCharData()
+    local ok, char = pcall(function() return exports['eonexis-character']:getMyCharacter() end)
+    if ok and char then
+        SendNUIMessage({ action='setCharData', char=char })
+    end
+end
+
+RegisterNUICallback('openCharacterCreator', function(_, cb)
+    cb({})
+    closePhone()
+    local ok, _ = pcall(function() exports['eonexis-character']:openCharacterCreator() end)
+end)
+
+-- ── Quests App ────────────────────────────────────────────────────────────────
+
+RegisterNUICallback('openQuests', function(_, cb)
+    cb({})
+    closePhone()
+    TriggerEvent('eonexis-quests:openNUI')
+end)
+
+-- ── Stats App ─────────────────────────────────────────────────────────────────
+
+RegisterNUICallback('getStats', function(_, cb)
+    cb({})
+    local skillLevel = 1
+    local ok, lvl = pcall(function() return exports['eonexis-skilltree']:getLevel() end)
+    if ok and lvl then skillLevel = lvl end
+    SendNUIMessage({ action='setStats', cash=cash, bank=bank, job=job, skill=skillLevel })
+end)
+
+-- ── Admin App ─────────────────────────────────────────────────────────────────
+
+RegisterNUICallback('adminOpenTools', function(_, cb)
+    cb({})
+    closePhone()
+    TriggerEvent('eonexis-admintools:openMenu')
+end)
+
+RegisterNUICallback('adminNoclip', function(_, cb)
+    cb({})
+    TriggerServerEvent('eonexis-admintools:noclip')
+end)
+
+RegisterNUICallback('adminGod', function(_, cb)
+    cb({})
+    TriggerServerEvent('eonexis-admintools:god')
+end)
+
+RegisterNUICallback('adminFreeze', function(_, cb)
+    cb({})
+    TriggerServerEvent('eonexis-admintools:freezeAll')
+end)
+
+RegisterNUICallback('adminTeleportHome', function(_, cb)
+    cb({})
+    closePhone()
+    local ped = PlayerPedId()
+    SetEntityCoords(ped, -269.3, -955.4, 31.2, false, false, false, true)
+end)
+
+-- Check admin status and show/hide admin app icon
+RegisterNetEvent('eonexis-admintools:setAdminStatus')
+AddEventHandler('eonexis-admintools:setAdminStatus', function(isAdmin)
+    SendNUIMessage({ action='setAdmin', isAdmin=isAdmin })
+end)
+
+-- Send character + stats data when phone opens
+local _origOpenPhone = openPhone
+function openPhone()
+    if phoneOpen then return end
+    phoneOpen = true
+    SetNuiFocus(true, true)
+    SendNUIMessage({ action='open', cash=cash, bank=bank, job=job })
+    sendSpawnLocs()
+    sendGPSLocs()
+    sendCharData()
 end
 

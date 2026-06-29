@@ -27,6 +27,12 @@ async function getServerInfo() {
     }
 }
 
+// Raw CFX API data (for dashboards + status commands)
+async function fetchCfxData() {
+    const data = await fetchJson(`https://servers-frontend.fivem.net/api/servers/single/${cfg.FIVEM_SERVER_ID}`);
+    return data.Data || null;
+}
+
 // ── FiveM resource HTTP API ───────────────────────────────────────────────────
 
 async function fivemGet(path) {
@@ -59,6 +65,8 @@ async function markLinked(code, discordId) {
     catch { return null; }
 }
 
+const confirmLinked = markLinked;
+
 async function getBalance(license) {
     try { return await fivemGet(`/balance?license=${encodeURIComponent(license)}`); }
     catch { return null; }
@@ -67,6 +75,15 @@ async function getBalance(license) {
 async function giveMoneyOnline(license, amount, reason) {
     try { return await fivemPost('/givemoney', { license, amount, reason }); }
     catch { return null; }
+}
+
+// giveMoney: tries online first, falls back to offline file edit
+async function giveMoney(license, amount, reason) {
+    const onlineResult = await giveMoneyOnline(license, amount, reason);
+    if (onlineResult && onlineResult.ok) return { ok: true, online: true };
+    // Player offline — modify economy file directly
+    const offlineOk = addMoneyOffline(license, amount, reason);
+    return { ok: offlineOk, online: false };
 }
 
 // ── Economy file (offline player support) ────────────────────────────────────
@@ -104,44 +121,47 @@ function writeDailyDB(data) {
     fs.writeFileSync(cfg.DISCORD_DAILY_FILE, JSON.stringify(data, null, 2));
 }
 
-const DAILY_AMOUNT    = 500;
-const DAILY_COOLDOWN  = 24 * 60 * 60 * 1000;  // 24hrs
+const DAILY_AMOUNT   = 500;
+const DAILY_COOLDOWN = 24 * 60 * 60 * 1000;
 
-function claimDiscordDaily(license) {
+// discordId used as key so offline players still track streak
+async function claimDiscordDaily(discordId, license, playerName) {
     const db  = readDailyDB();
     const now = Date.now();
-    const rec = db[license] || { lastClaim: 0, streak: 0 };
+    const key = discordId || license;
+    const rec = db[key] || { lastClaim: 0, streak: 0 };
 
     if (now - rec.lastClaim < DAILY_COOLDOWN) {
         const remaining = rec.lastClaim + DAILY_COOLDOWN - now;
-        const hrs = Math.floor(remaining / 3600000);
-        const mins = Math.floor((remaining % 3600000) / 60000);
-        return { ok: false, msg: `Already claimed. Next claim in **${hrs}h ${mins}m**.` };
+        return { ok: false, remaining: Math.floor(remaining / 1000) };
     }
 
-    // Update streak
-    if (now - rec.lastClaim < DAILY_COOLDOWN * 2) {
-        rec.streak = (rec.streak || 0) + 1;
-    } else {
-        rec.streak = 1;
-    }
+    rec.streak = (now - rec.lastClaim < DAILY_COOLDOWN * 2) ? (rec.streak || 0) + 1 : 1;
     rec.lastClaim = now;
-    db[license] = rec;
+    db[key] = rec;
     writeDailyDB(db);
 
-    const bonus = Math.min(rec.streak * 50, 500);
-    const total = DAILY_AMOUNT + bonus;
+    const bonus  = Math.min(rec.streak * 50, 500);
+    const amount = DAILY_AMOUNT + bonus;
 
-    return { ok: true, amount: total, streak: rec.streak, bonus };
+    // Give money in-game or offline
+    await giveMoney(license, amount, 'Discord daily bonus');
+
+    return { ok: true, amount, streak: rec.streak, bonus };
 }
 
 module.exports = {
     getServerInfo,
+    fetchCfxData,
     verifyCode,
     markLinked,
+    confirmLinked,
     getBalance,
     giveMoneyOnline,
+    giveMoney,
     getPlayerData,
     addMoneyOffline,
     claimDiscordDaily,
+    fivemPost,
+    fivemGet,
 };

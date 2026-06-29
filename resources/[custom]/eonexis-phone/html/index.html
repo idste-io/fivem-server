@@ -17,12 +17,16 @@
     <div id="home-screen" class="app-screen active">
       <div class="wallpaper-logo">EONEXIS</div>
       <div class="app-grid">
-        <button class="app-icon" onclick="openApp('spawn')">  <div class="icon">🪂</div><div class="lbl">Spawn</div>     </button>
-        <button class="app-icon" onclick="openApp('bank')">   <div class="icon">💰</div><div class="lbl">Bank</div>      </button>
-        <button class="app-icon" onclick="openApp('jobs')">   <div class="icon">💼</div><div class="lbl">Jobs</div>      </button>
-        <button class="app-icon" onclick="openApp('players')"><div class="icon">👥</div><div class="lbl">Players</div>   </button>
-        <button class="app-icon" onclick="openApp('inv')">    <div class="icon">📦</div><div class="lbl">Inventory</div></button>
-        <button class="app-icon" onclick="openApp('gps')">    <div class="icon">🗺️</div><div class="lbl">GPS</div>       </button>
+        <button class="app-icon" onclick="openApp('spawn')">   <div class="icon">🪂</div><div class="lbl">Spawn</div>      </button>
+        <button class="app-icon" onclick="openApp('bank')">    <div class="icon">💰</div><div class="lbl">Bank</div>       </button>
+        <button class="app-icon" onclick="openApp('jobs')">    <div class="icon">💼</div><div class="lbl">Jobs</div>       </button>
+        <button class="app-icon" onclick="openApp('players')"> <div class="icon">👥</div><div class="lbl">Players</div>    </button>
+        <button class="app-icon" onclick="openApp('inv')">     <div class="icon">📦</div><div class="lbl">Inventory</div> </button>
+        <button class="app-icon" onclick="openApp('gps')">     <div class="icon">🗺️</div><div class="lbl">GPS</div>        </button>
+        <button class="app-icon" onclick="openApp('character')"><div class="icon">🧑</div><div class="lbl">Character</div></button>
+        <button class="app-icon" onclick="openApp('quests')">  <div class="icon">📜</div><div class="lbl">Quests</div>    </button>
+        <button class="app-icon" onclick="openApp('stats')">   <div class="icon">📊</div><div class="lbl">Stats</div>     </button>
+        <button id="admin-app-btn" class="app-icon hidden" onclick="openApp('adminpanel')"><div class="icon">🛡️</div><div class="lbl">Admin</div></button>
       </div>
       <button class="close-phone" onclick="post('close')">✕ Close</button>
     </div>
@@ -76,6 +80,54 @@
     <div id="app-gps" class="app-screen">
       <div class="app-bar"><button onclick="goHome()">←</button><h3>GPS</h3></div>
       <div class="app-body" id="gps-list"></div>
+    </div>
+
+    <!-- CHARACTER APP -->
+    <div id="app-character" class="app-screen">
+      <div class="app-bar"><button onclick="goHome()">←</button><h3>Character</h3></div>
+      <div class="app-body">
+        <div id="char-info" style="padding:8px 0">
+          <div class="bank-row"><span>Name</span><strong id="char-name-ph">—</strong></div>
+          <div class="bank-row"><span>Gender</span><strong id="char-gender-ph">—</strong></div>
+          <div class="bank-row"><span>Outfit</span><strong id="char-outfit-ph">—</strong></div>
+          <div class="bank-row" style="align-items:flex-start"><span>Bio</span><em id="char-bio-ph" style="text-align:right;font-size:11px;max-width:60%;opacity:0.7">—</em></div>
+        </div>
+        <button class="full-btn" onclick="post('openCharacterCreator')">✏️ Edit Character</button>
+        <p class="hint">Name changes cost $500 after first creation.</p>
+      </div>
+    </div>
+
+    <!-- QUESTS APP -->
+    <div id="app-quests" class="app-screen">
+      <div class="app-bar"><button onclick="goHome()">←</button><h3>Quests</h3></div>
+      <div class="app-body">
+        <button class="full-btn" onclick="post('openQuests')">📜 Open Quest Log</button>
+        <p class="hint">You can also press Q to open the quest log.</p>
+      </div>
+    </div>
+
+    <!-- STATS APP -->
+    <div id="app-stats" class="app-screen">
+      <div class="app-bar"><button onclick="goHome()">←</button><h3>My Stats</h3></div>
+      <div class="app-body" id="stats-body">
+        <div class="bank-row"><span>Cash</span><strong id="stat-cash">—</strong></div>
+        <div class="bank-row"><span>Bank</span><strong id="stat-bank">—</strong></div>
+        <div class="bank-row"><span>Job</span><strong id="stat-job">—</strong></div>
+        <div class="bank-row"><span>Skill Level</span><strong id="stat-skill">—</strong></div>
+      </div>
+    </div>
+
+    <!-- ADMIN APP (admin-only, hidden for regular players) -->
+    <div id="app-adminpanel" class="app-screen">
+      <div class="app-bar"><button onclick="goHome()">←</button><h3>Admin Panel</h3></div>
+      <div class="app-body">
+        <button class="full-btn" onclick="post('adminOpenTools')">⚙️ Admin Tools</button>
+        <button class="full-btn" onclick="post('adminNoclip')">✈️ Toggle Noclip</button>
+        <button class="full-btn" onclick="post('adminGod')">🛡️ Toggle God Mode</button>
+        <button class="full-btn" onclick="post('adminFreeze')">❄️ Freeze All Players</button>
+        <button class="full-btn" onclick="post('adminTeleportHome')">🏠 Teleport to Spawn</button>
+        <p class="hint" style="color:#e74c3c">Admin-only. Only visible to admins.</p>
+      </div>
     </div>
   </div>
 </div>

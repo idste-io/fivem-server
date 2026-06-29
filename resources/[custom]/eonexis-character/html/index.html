@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Character</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="overlay" class="hidden">
+  <div class="panel">
+    <div class="header">
+      <div class="logo">⬡ EONEXIS RP</div>
+      <div id="panel-title" class="subtitle">Create Your Character</div>
+    </div>
+
+    <div id="error-bar" class="error-bar hidden"></div>
+
+    <div class="body">
+      <!-- Left: Form -->
+      <div class="form-col">
+        <div class="section-label">Identity</div>
+        <label class="field-label">Character Name</label>
+        <input id="char-name" type="text" class="field-input" placeholder="Enter your character name" maxlength="32" />
+
+        <label class="field-label">Gender</label>
+        <div class="gender-row">
+          <button class="gender-btn active" data-gender="male" onclick="setGender('male')">♂ Male</button>
+          <button class="gender-btn" data-gender="female" onclick="setGender('female')">♀ Female</button>
+        </div>
+
+        <label class="field-label">Biography <span class="optional">(optional)</span></label>
+        <textarea id="char-bio" class="field-textarea" placeholder="A little about your character…" maxlength="200"></textarea>
+      </div>
+
+      <!-- Right: Outfit -->
+      <div class="outfit-col">
+        <div class="section-label">Outfit</div>
+        <div id="outfit-list" class="outfit-list">
+          <!-- populated by JS -->
+        </div>
+        <div id="outfit-price" class="outfit-price"></div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div id="cost-info" class="cost-info hidden">
+        <span id="cost-label"></span>
+      </div>
+      <div class="footer-btns">
+        <button class="btn-cancel" onclick="cancel()">Cancel</button>
+        <button class="btn-save" onclick="save()">Save Character</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

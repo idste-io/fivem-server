@@ -3,6 +3,7 @@ const { Client, GatewayIntentBits, Partials, ActivityType } = require('discord.j
 const cfg        = require('./src/config');
 const commands   = require('./src/commands');
 const tasks      = require('./src/tasks');
+const dashboards = require('./src/dashboards');
 const { startHttpServer } = require('./src/httpServer');
 
 if (!cfg.BOT_TOKEN) {
@@ -32,10 +33,11 @@ client.once('ready', async () => {
     // Start HTTP server for FiveM events
     startHttpServer(client);
 
-    // Post verify message
+    // Post channel dashboards (verify, cmd, update, join-leave, admin)
+    await dashboards.postAllDashboards(client);
     await commands.postVerifyMessage(client);
 
-    // Post initial status
+    // Post initial status to #update
     await tasks.postStatus(client);
 
     console.log('[bot] Ready.');

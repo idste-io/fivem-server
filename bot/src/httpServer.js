@@ -45,25 +45,53 @@ function startHttpServer(client) {
     });
 
     async function handleFivemEvent(client, evt) {
-        const joinLeaveCh = await client.channels.fetch(cfg.JOIN_LEAVE_CHANNEL_ID).catch(() => null);
-        if (!joinLeaveCh) return;
-
-        if (evt.type === 'join') {
-            joinLeaveCh.send({ embeds: [
+        if (evt.type === 'join' || evt.type === 'leave') {
+            const ch = await client.channels.fetch(cfg.JOIN_LEAVE_CHANNEL_ID).catch(() => null);
+            if (!ch) return;
+            if (evt.type === 'join') {
+                ch.send({ embeds: [
+                    new EmbedBuilder()
+                        .setColor(GREEN)
+                        .setDescription(`→ **${evt.name}** joined the server *(${evt.playerCount}/${evt.maxPlayers} online)*`)
+                        .setTimestamp()
+                ]});
+            } else {
+                ch.send({ embeds: [
+                    new EmbedBuilder()
+                        .setColor(RED)
+                        .setDescription(`← **${evt.name}** left the server *(${evt.playerCount}/${evt.maxPlayers} online)*`)
+                        .setTimestamp()
+                ]});
+            }
+        } else if (evt.type === 'anticheat') {
+            // Anti-cheat flag → admin channel
+            const ch = await client.channels.fetch(cfg.ADMIN_CHANNEL_ID).catch(() => null);
+            if (!ch) return;
+            ch.send({ embeds: [
                 new EmbedBuilder()
-                    .setColor(GREEN)
-                    .setDescription(`→ **${evt.name}** joined the server *(${evt.playerCount}/${evt.maxPlayers} online)*`)
+                    .setTitle('🚨 Anti-Cheat Flag')
+                    .setColor(0xFF4444)
+                    .addFields(
+                        { name: 'Player',   value: evt.player  || 'Unknown', inline: true },
+                        { name: 'License',  value: evt.license ? `\`${evt.license}\`` : 'N/A', inline: true },
+                        { name: 'Reason',   value: evt.reason  || 'Unknown', inline: false },
+                        { name: 'Time',     value: evt.time    || new Date().toISOString(), inline: true },
+                    )
+                    .setFooter({ text: 'Eonexis Anti-Cheat System' })
                     .setTimestamp()
             ]});
-        } else if (evt.type === 'leave') {
-            joinLeaveCh.send({ embeds: [
-                new EmbedBuilder()
-                    .setColor(RED)
-                    .setDescription(`← **${evt.name}** left the server *(${evt.playerCount}/${evt.maxPlayers} online)*`)
-                    .setTimestamp()
-            ]});
-        } else if (evt.type === 'chat') {
-            // Future: relay chat messages
+        } else if (evt.type === 'servermon') {
+            // Server monitor errors → update channel
+            const ch = await client.channels.fetch(cfg.UPDATE_CHANNEL_ID).catch(() => null);
+            if (ch) {
+                ch.send({ embeds: [
+                    new EmbedBuilder()
+                        .setTitle('⚠️ Server Errors')
+                        .setColor(0xFF8C00)
+                        .setDescription(evt.errors ? evt.errors.join('\n').slice(0, 2000) : 'Unknown errors')
+                        .setTimestamp()
+                ]});
+            }
         }
     }
 

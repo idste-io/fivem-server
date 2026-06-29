@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Eonexis — Job Center</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="overlay" class="hidden">
+  <div class="panel">
+    <div class="header">
+      <div class="logo">EONEXIS</div>
+      <h2>Job Center</h2>
+      <button class="close-btn" onclick="close_()">✕</button>
+    </div>
+    <div id="current-job-bar" class="hidden">
+      <span id="current-label"></span>
+      <div style="display:flex;gap:8px">
+        <button class="btn-small btn-work" onclick="startShift()">▶ Start Shift</button>
+        <button class="btn-small btn-quit" onclick="quitJob()">Quit</button>
+      </div>
+    </div>
+    <div id="job-list"></div>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

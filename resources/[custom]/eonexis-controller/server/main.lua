@@ -1,0 +1,1 @@
+-- eonexis-controller — server (client-only mod, no server logic needed)

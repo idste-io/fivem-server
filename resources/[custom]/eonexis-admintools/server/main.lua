@@ -112,11 +112,83 @@ RegisterCommand('players', function(src)
     notify(src, table.concat(list, ', '), 'info')
 end, true)
 
-TriggerEvent('chat:addSuggestion', '/kick',    'Kick a player', {{ name='id/name', help='Player ID or name' }, { name='reason', help='Reason' }})
-TriggerEvent('chat:addSuggestion', '/ban',     'Ban a player',  {{ name='id/name', help='Player ID or name' }, { name='reason', help='Reason' }})
-TriggerEvent('chat:addSuggestion', '/tp',      'Teleport to player', {{ name='id/name', help='Player ID or name' }})
-TriggerEvent('chat:addSuggestion', '/bring',   'Bring player to you', {{ name='id/name', help='Player ID or name' }})
-TriggerEvent('chat:addSuggestion', '/freeze',  'Freeze a player', {{ name='id/name', help='Player ID or name' }})
-TriggerEvent('chat:addSuggestion', '/god',     'Toggle god mode', {})
-TriggerEvent('chat:addSuggestion', '/noclip',  'Toggle noclip',   {})
-TriggerEvent('chat:addSuggestion', '/players', 'List online players', {})
+-- /givemoney <id|name> <amount>
+RegisterCommand('givemoney', function(src, args)
+    if not isAdmin(src) then notify(src, 'No permission.', 'error'); return end
+    local target = findPlayer(args[1])
+    local amount = tonumber(args[2])
+    if not target or not amount or amount <= 0 then notify(src, 'Usage: /givemoney <id/name> <amount>', 'error'); return end
+    local ok, err = pcall(function()
+        exports['eonexis-economy']:addMoney(target, amount, 'admin give: ' .. GetPlayerName(src))
+    end)
+    if ok then
+        notify(src, string.format('Gave $%d to %s.', amount, GetPlayerName(target)), 'success')
+        notify(target, string.format('Admin gave you $%d.', amount), 'info')
+    else
+        notify(src, 'Economy mod not loaded.', 'error')
+    end
+end, true)
+
+-- /setmoney <id|name> <amount>
+RegisterCommand('setmoney', function(src, args)
+    if not isAdmin(src) then notify(src, 'No permission.', 'error'); return end
+    local target = findPlayer(args[1])
+    local amount = tonumber(args[2])
+    if not target or not amount then notify(src, 'Usage: /setmoney <id/name> <amount>', 'error'); return end
+    local ok = pcall(function()
+        local cur = exports['eonexis-economy']:getMoney(target)
+        if cur > amount then
+            exports['eonexis-economy']:removeMoney(target, cur - amount, 'admin set')
+        else
+            exports['eonexis-economy']:addMoney(target, amount - cur, 'admin set')
+        end
+    end)
+    if ok then notify(src, string.format('Set %s cash to $%d.', GetPlayerName(target), amount), 'success') end
+end, true)
+
+-- /removemoney <id|name> <amount>
+RegisterCommand('removemoney', function(src, args)
+    if not isAdmin(src) then notify(src, 'No permission.', 'error'); return end
+    local target = findPlayer(args[1])
+    local amount = tonumber(args[2])
+    if not target or not amount or amount <= 0 then notify(src, 'Usage: /removemoney <id/name> <amount>', 'error'); return end
+    pcall(function() exports['eonexis-economy']:removeMoney(target, amount, 'admin remove') end)
+    notify(src, string.format('Removed $%d from %s.', amount, GetPlayerName(target)), 'success')
+end, true)
+
+-- /setjob <id|name> <job>
+RegisterCommand('setjob', function(src, args)
+    if not isAdmin(src) then notify(src, 'No permission.', 'error'); return end
+    local target = findPlayer(args[1])
+    local job    = args[2]
+    if not target or not job then notify(src, 'Usage: /setjob <id/name> <job>', 'error'); return end
+    pcall(function() exports['eonexis-economy']:setJob(target, job) end)
+    notify(src, string.format('Set %s job to %s.', GetPlayerName(target), job), 'success')
+    notify(target, string.format('Admin set your job to %s.', job), 'info')
+end, true)
+
+-- /checkwallet <id|name>
+RegisterCommand('checkwallet', function(src, args)
+    if not isAdmin(src) then notify(src, 'No permission.', 'error'); return end
+    local target = findPlayer(args[1])
+    if not target then notify(src, 'Player not found.', 'error'); return end
+    local ok, data = pcall(function() return exports['eonexis-economy']:getPlayerData(target) end)
+    if ok and data then
+        notify(src, string.format('%s — Cash: $%d  Bank: $%d  Job: %s',
+            GetPlayerName(target), data.cash, data.bank, data.job), 'info')
+    end
+end, true)
+
+TriggerEvent('chat:addSuggestion', '/kick',         'Kick a player', {{ name='id/name', help='ID or name' }, { name='reason', help='Reason' }})
+TriggerEvent('chat:addSuggestion', '/ban',          'Ban a player',  {{ name='id/name', help='ID or name' }, { name='reason', help='Reason' }})
+TriggerEvent('chat:addSuggestion', '/tp',           'Teleport to player', {{ name='id/name', help='ID or name' }})
+TriggerEvent('chat:addSuggestion', '/bring',        'Bring player to you', {{ name='id/name', help='ID or name' }})
+TriggerEvent('chat:addSuggestion', '/freeze',       'Freeze a player', {{ name='id/name', help='ID or name' }})
+TriggerEvent('chat:addSuggestion', '/god',          'Toggle god mode', {})
+TriggerEvent('chat:addSuggestion', '/noclip',       'Toggle noclip', {})
+TriggerEvent('chat:addSuggestion', '/players',      'List online players', {})
+TriggerEvent('chat:addSuggestion', '/givemoney',    'Give money to player', {{ name='id/name', help='ID or name' }, { name='amount', help='Amount' }})
+TriggerEvent('chat:addSuggestion', '/setmoney',     'Set player cash', {{ name='id/name', help='ID or name' }, { name='amount', help='Amount' }})
+TriggerEvent('chat:addSuggestion', '/removemoney',  'Remove money from player', {{ name='id/name', help='ID or name' }, { name='amount', help='Amount' }})
+TriggerEvent('chat:addSuggestion', '/setjob',       'Set player job', {{ name='id/name', help='ID or name' }, { name='job', help='Job ID' }})
+TriggerEvent('chat:addSuggestion', '/checkwallet',  'Check player wallet', {{ name='id/name', help='ID or name' }})

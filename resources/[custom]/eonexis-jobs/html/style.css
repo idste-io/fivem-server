@@ -1,0 +1,56 @@
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:transparent; font-family:'Segoe UI',sans-serif; display:flex; align-items:center; justify-content:center; height:100vh; }
+.hidden { display:none !important; }
+
+#overlay { display:flex; align-items:center; justify-content:center; width:100vw; height:100vh; background:rgba(0,0,0,0.65); }
+
+.panel {
+    background:hsl(240,15%,8%); border:1px solid hsl(258,85%,40%);
+    border-radius:14px; width:520px; max-height:82vh; display:flex; flex-direction:column;
+    box-shadow:0 0 50px rgba(130,80,255,0.2);
+}
+.header {
+    display:flex; align-items:center; gap:12px; padding:20px 24px 16px;
+    border-bottom:1px solid hsl(240,15%,16%);
+}
+.logo { color:hsl(258,85%,65%); font-size:11px; font-weight:700; letter-spacing:4px; }
+h2 { color:#fff; font-size:17px; font-weight:700; flex:1; }
+.close-btn { background:none; border:none; color:rgba(255,255,255,0.35); font-size:18px; cursor:pointer; }
+.close-btn:hover { color:#fff; }
+
+#current-job-bar {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 24px; background:hsl(258,40%,15%);
+    border-bottom:1px solid hsl(258,60%,30%);
+    font-size:13px; color:hsl(258,85%,75%); font-weight:600;
+}
+.btn-small {
+    background:hsl(258,85%,50%); color:#fff; border:none;
+    border-radius:6px; padding:5px 12px; font-size:12px; cursor:pointer; font-weight:600;
+}
+.btn-quit { background:hsl(0,60%,45%); }
+.btn-work { background:hsl(140,60%,35%); }
+
+#job-list { overflow-y:auto; flex:1; padding:12px 24px 20px; }
+#job-list::-webkit-scrollbar { width:4px; }
+#job-list::-webkit-scrollbar-thumb { background:hsl(258,60%,35%); border-radius:2px; }
+
+.job-card {
+    display:flex; align-items:center; gap:14px;
+    background:hsl(240,15%,11%); border:1px solid hsl(240,15%,18%);
+    border-radius:10px; padding:14px 16px; margin-bottom:8px; cursor:pointer;
+    transition:border-color 0.15s;
+}
+.job-card:hover { border-color:hsl(258,60%,45%); }
+.job-card.active { border-color:hsl(258,85%,55%); background:hsl(258,30%,14%); }
+.job-icon { font-size:28px; }
+.job-info { flex:1; }
+.job-label { color:#fff; font-size:14px; font-weight:600; }
+.job-desc  { color:rgba(255,255,255,0.4); font-size:12px; margin-top:3px; line-height:1.4; }
+.job-pay   { color:#5de87a; font-size:12px; font-weight:600; margin-top:4px; }
+.btn-select {
+    background:hsl(258,85%,50%); color:#fff; border:none;
+    border-radius:6px; padding:8px 14px; font-size:13px; font-weight:600;
+    cursor:pointer; white-space:nowrap;
+}
+.btn-select:hover { opacity:0.85; }

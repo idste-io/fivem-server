@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Eonexis — Property</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="overlay" class="hidden">
+  <div class="panel">
+    <button class="close-btn" onclick="close_()">✕</button>
+    <div class="prop-icon" id="prop-icon">🏠</div>
+    <h2 id="prop-label">Property Name</h2>
+    <p class="prop-desc" id="prop-desc">Description</p>
+    <div class="prop-meta">
+      <span class="badge" id="prop-type">House</span>
+      <span class="price" id="prop-price">$0</span>
+    </div>
+    <div id="actions">
+      <button class="btn btn-buy" id="btn-buy" onclick="buyProp()">Buy Property</button>
+      <button class="btn btn-sell hidden" id="btn-sell" onclick="sellProp()">Sell (60%)</button>
+      <button class="btn btn-home hidden" id="btn-home" onclick="setHome()">Set as Home Spawn</button>
+    </div>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

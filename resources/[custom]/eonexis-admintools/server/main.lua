@@ -1,14 +1,40 @@
 -- eonexis-admintools — server
 
-local bannedLicenses = {}  -- in-memory ban list (resets on server restart; extend with file I/O if needed)
+local bannedLicenses = {}
+local persistentAdmins = {}  -- { [license] = playerName }
+
+local function loadAdmins()
+    local raw = LoadResourceFile(GetCurrentResourceName(), Config.AdminDataFile)
+    if raw and #raw > 2 then
+        local ok, parsed = pcall(json.decode, raw)
+        if ok and parsed then persistentAdmins = parsed end
+    end
+end
+
+local function saveAdmins()
+    SaveResourceFile(GetCurrentResourceName(), Config.AdminDataFile, json.encode(persistentAdmins), -1)
+end
+
+loadAdmins()
+
+local function getIdentifier(src)
+    local license = GetPlayerIdentifierByType(src, 'license')
+    if license and license ~= '' then return license end
+    local steam = GetPlayerIdentifierByType(src, 'steam')
+    if steam and steam ~= '' then return steam end
+    return GetPlayerIdentifier(src, 0)
+end
 
 local function isAdmin(src)
     if Config.AllowServerOwner then
         if IsPlayerAceAllowed(src, 'command') then return true end
     end
-    local license = GetPlayerIdentifierByType(src, 'license') or GetPlayerIdentifier(src, 0)
-    for _, a in ipairs(Config.Admins) do
-        if a == license then return true end
+    local license = getIdentifier(src)
+    if license then
+        for _, a in ipairs(Config.Admins) do
+            if a == license then return true end
+        end
+        if persistentAdmins[license] then return true end
     end
     return false
 end
@@ -28,6 +54,24 @@ local function findPlayer(idOrName)
     return nil
 end
 
+-- /claimadmin <password> — one-time setup to add yourself as persistent admin
+RegisterCommand('claimadmin', function(src, args)
+    if args[1] ~= Config.ClaimAdminPassword then
+        notify(src, 'Wrong password.', 'error')
+        return
+    end
+    local license = getIdentifier(src)
+    if not license then notify(src, 'Could not read your identifier.', 'error'); return end
+    if persistentAdmins[license] then
+        notify(src, 'You are already a saved admin.', 'info')
+        return
+    end
+    persistentAdmins[license] = GetPlayerName(src)
+    saveAdmins()
+    notify(src, 'Admin access granted! You now have full admin powers.', 'success')
+    print('[eonexis-admintools] Admin claimed by ' .. GetPlayerName(src) .. ' (' .. license .. ')')
+end, false)
+
 -- /kick <id|name> [reason]
 RegisterCommand('kick', function(src, args)
     if not isAdmin(src) then notify(src, 'No permission.', 'error'); return end
@@ -43,7 +87,7 @@ RegisterCommand('ban', function(src, args)
     if not isAdmin(src) then notify(src, 'No permission.', 'error'); return end
     local target = findPlayer(args[1])
     if not target then notify(src, 'Player not found.', 'error'); return end
-    local license = GetPlayerIdentifierByType(target, 'license') or GetPlayerIdentifier(target, 0)
+    local license = getIdentifier(target)
     if license then bannedLicenses[license] = true end
     local reason = table.concat(args, ' ', 2) ~= '' and table.concat(args, ' ', 2) or 'Banned by admin'
     DropPlayer(target, '[BANNED] ' .. reason)
@@ -64,7 +108,7 @@ AddEventHandler('playerConnecting', function(_, _, deferrals)
     end
 end)
 
--- /tp <id|name> — teleport self to player
+-- /tp <id|name>
 RegisterCommand('tp', function(src, args)
     if not isAdmin(src) then notify(src, 'No permission.', 'error'); return end
     local target = findPlayer(args[1])
@@ -72,7 +116,7 @@ RegisterCommand('tp', function(src, args)
     TriggerClientEvent('eonexis-admintools:tpTo', src, target)
 end, true)
 
--- /bring <id|name> — bring player to self
+-- /bring <id|name>
 RegisterCommand('bring', function(src, args)
     if not isAdmin(src) then notify(src, 'No permission.', 'error'); return end
     local target = findPlayer(args[1])
@@ -90,19 +134,19 @@ RegisterCommand('freeze', function(src, args)
     notify(src, 'Toggled freeze on ' .. GetPlayerName(target), 'info')
 end, true)
 
--- /god — toggle god mode for self
+-- /god
 RegisterCommand('god', function(src)
     if not isAdmin(src) then notify(src, 'No permission.', 'error'); return end
     TriggerClientEvent('eonexis-admintools:toggleGod', src)
 end, true)
 
--- /noclip — toggle noclip for self
+-- /noclip
 RegisterCommand('noclip', function(src)
     if not isAdmin(src) then notify(src, 'No permission.', 'error'); return end
     TriggerClientEvent('eonexis-admintools:toggleNoclip', src)
 end, true)
 
--- /players — list online players
+-- /players
 RegisterCommand('players', function(src)
     if not isAdmin(src) then notify(src, 'No permission.', 'error'); return end
     local list = {}
@@ -112,13 +156,21 @@ RegisterCommand('players', function(src)
     notify(src, table.concat(list, ', '), 'info')
 end, true)
 
+-- /admins
+RegisterCommand('admins', function(src)
+    if not isAdmin(src) then notify(src, 'No permission.', 'error'); return end
+    local list = {}
+    for _, name in pairs(persistentAdmins) do table.insert(list, name) end
+    notify(src, 'Saved admins: ' .. (#list > 0 and table.concat(list, ', ') or 'none'), 'info')
+end, true)
+
 -- /givemoney <id|name> <amount>
 RegisterCommand('givemoney', function(src, args)
     if not isAdmin(src) then notify(src, 'No permission.', 'error'); return end
     local target = findPlayer(args[1])
     local amount = tonumber(args[2])
     if not target or not amount or amount <= 0 then notify(src, 'Usage: /givemoney <id/name> <amount>', 'error'); return end
-    local ok, err = pcall(function()
+    local ok = pcall(function()
         exports['eonexis-economy']:addMoney(target, amount, 'admin give: ' .. GetPlayerName(src))
     end)
     if ok then
@@ -179,6 +231,7 @@ RegisterCommand('checkwallet', function(src, args)
     end
 end, true)
 
+TriggerEvent('chat:addSuggestion', '/claimadmin',   'Claim admin access with password', {{ name='password', help='Admin password' }})
 TriggerEvent('chat:addSuggestion', '/kick',         'Kick a player', {{ name='id/name', help='ID or name' }, { name='reason', help='Reason' }})
 TriggerEvent('chat:addSuggestion', '/ban',          'Ban a player',  {{ name='id/name', help='ID or name' }, { name='reason', help='Reason' }})
 TriggerEvent('chat:addSuggestion', '/tp',           'Teleport to player', {{ name='id/name', help='ID or name' }})
@@ -187,6 +240,7 @@ TriggerEvent('chat:addSuggestion', '/freeze',       'Freeze a player', {{ name='
 TriggerEvent('chat:addSuggestion', '/god',          'Toggle god mode', {})
 TriggerEvent('chat:addSuggestion', '/noclip',       'Toggle noclip', {})
 TriggerEvent('chat:addSuggestion', '/players',      'List online players', {})
+TriggerEvent('chat:addSuggestion', '/admins',       'List saved admins', {})
 TriggerEvent('chat:addSuggestion', '/givemoney',    'Give money to player', {{ name='id/name', help='ID or name' }, { name='amount', help='Amount' }})
 TriggerEvent('chat:addSuggestion', '/setmoney',     'Set player cash', {{ name='id/name', help='ID or name' }, { name='amount', help='Amount' }})
 TriggerEvent('chat:addSuggestion', '/removemoney',  'Remove money from player', {{ name='id/name', help='ID or name' }, { name='amount', help='Amount' }})

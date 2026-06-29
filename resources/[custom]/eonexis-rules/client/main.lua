@@ -8,6 +8,9 @@ RegisterCommand('rules', function()
     rulesOpen = true
     SetNuiFocus(true, true)
     SendNUIMessage({ type = 'open' })
+    TriggerServerEvent('eonexis-skilltree:complete', 'check_rules')
+    TriggerEvent('eonexis-rules:opened')
+    TriggerServerEvent('eonexis-quests:serverKey', 'rules_opened')
 end, false)
 
 RegisterKeyMapping('rules', 'Open Server Rules', 'keyboard', 'F2')

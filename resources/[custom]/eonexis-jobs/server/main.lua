@@ -114,6 +114,8 @@ AddEventHandler('eonexis-jobs:taskDone', function(jobId)
     TriggerClientEvent('eonexis-jobs:taskComplete', src, amount,
         ('Job done! Earned $%d.'):format(amount))
     print(('[jobs] %s completed %s task, paid $%d'):format(GetPlayerName(src), task.job or jobId, amount))
+    TriggerEvent('eonexis-quests:objectiveDone', src, 'job_task_done')
+    TriggerEvent('eonexis-skilltree:taskDone', src)
 end)
 
 AddEventHandler('playerDropped', function()

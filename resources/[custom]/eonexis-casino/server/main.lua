@@ -68,4 +68,5 @@ AddEventHandler('eonexis-casino:spin', function()
     end
 
     TriggerClientEvent('eonexis-casino:spinResult', src, prizeIndex, prize)
+    TriggerEvent('eonexis-quests:objectiveDone', src, 'casino_spun')
 end)

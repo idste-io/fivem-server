@@ -328,6 +328,7 @@ RegisterCommand('pay', function(src, args)
         ('Paid %s%d to %s.'):format(Config.CurrencySymbol, amount, GetPlayerName(targetId)), 'success')
     TriggerClientEvent('eonexis-economy:notify', targetId,
         ('Received %s%d from %s.'):format(Config.CurrencySymbol, amount, GetPlayerName(src)), 'info')
+    TriggerEvent('eonexis-quests:objectiveDone', src, 'player_paid')
 end, false)
 
 -- Save location every 30s for last-location spawn

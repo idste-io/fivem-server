@@ -37,6 +37,7 @@ local function playEmote(name)
     TaskPlayAnim(ped, emote.dict, emote.clip, 2.0, 2.0, emote.loop and -1 or 2000, flags, 0, false, false, false)
     activePed  = ped
     activeDict = emote.dict
+    TriggerServerEvent('eonexis-quests:serverKey', 'emote_used')
 end
 
 RegisterCommand('e', function(_, args)

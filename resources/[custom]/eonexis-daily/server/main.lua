@@ -12,18 +12,15 @@ local function loadData()
 end
 
 local function saveData()
-    local dir = dataPath:match('(.+)/[^/]+$')
     SaveResourceFile(GetCurrentResourceName(), dataPath, json.encode(data), -1)
 end
 
 local function getDate()
-    -- Returns YYYY-MM-DD in UTC
     local t = os.date('!*t')
     return string.format('%04d-%02d-%02d', t.year, t.month, t.day)
 end
 
 local function dateDiff(a, b)
-    -- Returns difference in days between two YYYY-MM-DD strings (b - a)
     local function toSec(s)
         local y,m,d = s:match('(%d+)-(%d+)-(%d+)')
         return os.time({ year=tonumber(y), month=tonumber(m), day=tonumber(d), hour=0, min=0, sec=0 })
@@ -31,58 +28,33 @@ local function dateDiff(a, b)
     return math.floor((toSec(b) - toSec(a)) / 86400)
 end
 
+local function getIdentifier(src)
+    local license = GetPlayerIdentifierByType(src, 'license')
+    if license and license ~= '' then return license end
+    local steam = GetPlayerIdentifierByType(src, 'steam')
+    if steam and steam ~= '' then return steam end
+    return GetPlayerIdentifier(src, 0)
+end
+
 loadData()
-
-AddEventHandler('playerConnecting', function(name, _, deferrals)
-    deferrals.defer()
-    Wait(0)
-
-    local src = source
-    local identifiers = GetPlayerIdentifiers(src)
-    local steamId = nil
-    for _, id in ipairs(identifiers) do
-        if id:sub(1,6) == 'steam:' then steamId = id; break end
-    end
-    if not steamId then
-        for _, id in ipairs(identifiers) do
-            if id:sub(1,3) == 'ip:' then steamId = id; break end
-        end
-    end
-
-    if steamId and not data[steamId] then
-        data[steamId] = { lastDate=nil, streak=0 }
-    end
-
-    deferrals.done()
-end)
 
 RegisterNetEvent('eonexis-daily:claim')
 AddEventHandler('eonexis-daily:claim', function()
     local src = source
-    local identifiers = GetPlayerIdentifiers(src)
-    local steamId = nil
-    for _, id in ipairs(identifiers) do
-        if id:sub(1,6) == 'steam:' then steamId = id; break end
-    end
-    if not steamId then
-        for _, id in ipairs(identifiers) do
-            if id:sub(1,3) == 'ip:' then steamId = id; break end
-        end
-    end
-    if not steamId then
+    local id = getIdentifier(src)
+    if not id then
         TriggerClientEvent('eonexis-daily:result', src, false, 'Could not identify player.', 0, 0)
         return
     end
 
     local today = getDate()
-    local pData = data[steamId] or { lastDate=nil, streak=0 }
+    local pData = data[id] or { lastDate=nil, streak=0 }
 
     if pData.lastDate == today then
         TriggerClientEvent('eonexis-daily:result', src, false, 'Already claimed today. Come back tomorrow!', 0, pData.streak)
         return
     end
 
-    -- Update streak
     if pData.lastDate then
         local diff = dateDiff(pData.lastDate, today)
         if diff == 1 then
@@ -98,9 +70,10 @@ AddEventHandler('eonexis-daily:claim', function()
     local reward = rewardData.cash
 
     pData.lastDate = today
-    data[steamId] = pData
+    data[id] = pData
     saveData()
 
     exports['eonexis-economy']:addMoney(src, reward, 'daily check-in')
     TriggerClientEvent('eonexis-daily:result', src, true, rewardData.label, reward, pData.streak)
+    TriggerEvent('eonexis-quests:objectiveDone', src, 'daily_claimed')
 end)

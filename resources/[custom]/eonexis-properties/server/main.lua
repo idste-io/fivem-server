@@ -48,6 +48,7 @@ AddEventHandler('eonexis-properties:buy', function(propId)
     TriggerClientEvent('eonexis-properties:bought', src, propId)
     notify(src, string.format('You purchased %s!', prop.label), 'success')
     print(('[properties] %s bought %s for $%d'):format(GetPlayerName(src), propId, prop.price))
+    TriggerEvent('eonexis-quests:objectiveDone', src, 'property_purchased')
 end)
 
 RegisterNetEvent('eonexis-properties:sell')

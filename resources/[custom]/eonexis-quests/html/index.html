@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Quest Log</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app" style="display:none">
+  <div class="panel">
+    <div class="header">
+      <span class="logo">⬡</span>
+      <span class="title">QUEST LOG</span>
+      <button class="close-btn" id="closeBtn">✕ [Q]</button>
+    </div>
+    <div class="layout">
+      <div class="sidebar">
+        <div class="cat-tabs">
+          <button class="cat-tab active" data-cat="all">All</button>
+          <button class="cat-tab" data-cat="story">Story</button>
+          <button class="cat-tab" data-cat="side">Side</button>
+          <button class="cat-tab" data-cat="criminal">Criminal</button>
+        </div>
+        <div class="quest-list" id="questList"></div>
+      </div>
+      <div class="detail" id="detail">
+        <div class="empty-state">Select a quest to view details</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

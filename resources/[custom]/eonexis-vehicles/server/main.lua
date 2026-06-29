@@ -40,6 +40,7 @@ AddEventHandler('eonexis-vehicles:buy', function(model)
     TriggerClientEvent('eonexis-vehicles:spawnVehicle', src, model, true)
     notify(src, string.format('Purchased %s!', veh.label), 'success')
     print(('[vehicles] %s bought %s for $%d'):format(GetPlayerName(src), model, veh.price))
+    TriggerEvent('eonexis-quests:objectiveDone', src, 'vehicle_purchased')
 end)
 
 RegisterNetEvent('eonexis-vehicles:retrieve')

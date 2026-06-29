@@ -1,0 +1,236 @@
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  color: #e0e0e0;
+}
+
+.hidden { display: none !important; }
+
+.panel {
+  background: hsl(240,15%,7%);
+  border: 1px solid hsl(258,40%,28%);
+  border-radius: 14px;
+  width: 560px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.8);
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid hsl(240,15%,14%);
+  flex-shrink: 0;
+}
+
+.panel-header h1 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: hsl(258,85%,75%);
+  letter-spacing: 0.5px;
+}
+
+.subtitle {
+  font-size: 0.72rem;
+  color: #666;
+  margin-top: 3px;
+}
+
+.btn-close {
+  background: none; border: none; color: #555; font-size: 1.1rem;
+  cursor: pointer; padding: 2px 6px; border-radius: 4px;
+}
+.btn-close:hover { color: #e74c3c; }
+
+.tier-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 10px 16px;
+  border-bottom: 1px solid hsl(240,15%,12%);
+  flex-shrink: 0;
+}
+
+.tier-tab {
+  background: hsl(240,15%,11%);
+  border: 1px solid hsl(240,15%,18%);
+  color: #888;
+  font-size: 0.72rem;
+  padding: 5px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.tier-tab:hover { color: #ccc; border-color: hsl(258,40%,35%); }
+.tier-tab.active {
+  background: hsl(258,60%,30%);
+  border-color: hsl(258,60%,45%);
+  color: #e0d0ff;
+}
+
+.progress-bar-wrap {
+  position: relative;
+  height: 6px;
+  background: hsl(240,15%,13%);
+  flex-shrink: 0;
+  margin: 0 16px 6px;
+  border-radius: 3px;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, hsl(258,70%,50%), hsl(258,85%,70%));
+  border-radius: 3px;
+  transition: width 0.4s ease;
+  width: 0%;
+}
+.progress-text {
+  position: absolute;
+  right: 0; top: -18px;
+  font-size: 0.65rem;
+  color: #666;
+}
+
+.skill-list {
+  overflow-y: auto;
+  padding: 10px 14px 14px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tier-header {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #444;
+  margin: 10px 0 4px 2px;
+}
+
+.skill-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 13px;
+  border-radius: 10px;
+  border: 1px solid hsl(240,15%,14%);
+  background: hsl(240,15%,10%);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.skill-card.done {
+  border-color: hsl(145,50%,22%);
+  background: hsl(145,20%,9%);
+  opacity: 0.75;
+}
+
+.skill-card.available:not(.done) {
+  border-color: hsl(258,40%,30%);
+  cursor: default;
+}
+
+.skill-card.locked {
+  opacity: 0.45;
+}
+
+.skill-icon {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  background: hsl(240,15%,14%);
+  border: 2px solid hsl(240,15%,20%);
+}
+.skill-card.done .skill-icon {
+  background: hsl(145,40%,15%);
+  border-color: hsl(145,50%,30%);
+}
+.skill-card.available:not(.done) .skill-icon {
+  border-color: hsl(258,60%,40%);
+}
+
+.skill-body { flex: 1; min-width: 0; }
+.skill-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #ddd;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.skill-card.done .skill-label { color: hsl(145,60%,55%); }
+
+.skill-desc {
+  font-size: 0.72rem;
+  color: #666;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.skill-card.available .skill-desc { color: #888; }
+
+.skill-reward {
+  font-size: 0.72rem;
+  color: #f39c12;
+  margin-top: 3px;
+  white-space: nowrap;
+}
+
+.skill-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.badge-done {
+  font-size: 0.7rem;
+  color: hsl(145,60%,50%);
+  background: hsl(145,40%,12%);
+  border: 1px solid hsl(145,50%,25%);
+  padding: 2px 9px;
+  border-radius: 10px;
+}
+
+.badge-locked {
+  font-size: 0.7rem;
+  color: #444;
+  padding: 2px 9px;
+}
+
+.btn-complete {
+  background: hsl(258,65%,42%);
+  border: none;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 5px 13px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.btn-complete:hover { background: hsl(258,65%,54%); }
+
+.tier-badge {
+  font-size: 0.62rem;
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-weight: 700;
+}
+.tier1 { background: hsl(210,50%,18%); color: hsl(210,70%,65%); }
+.tier2 { background: hsl(30,50%,18%);  color: hsl(30,70%,65%);  }
+.tier3 { background: hsl(258,50%,18%); color: hsl(258,70%,75%); }

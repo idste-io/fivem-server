@@ -1,0 +1,48 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --primary: hsl(258,85%,65%);
+  --bg: hsl(240,15%,6%);
+  --surface: hsl(240,12%,10%);
+  --text: #e8e8f0; --text-dim: #888;
+  --gold: #fbbf24; --silver: #94a3b8; --bronze: #c47c2b;
+}
+body { background: transparent; font-family: 'Segoe UI', sans-serif; color: var(--text); }
+#app {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.55); animation: fadeIn 0.15s ease;
+}
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+.panel {
+  width: 520px; background: var(--bg);
+  border: 1px solid rgba(147,82,219,0.3); border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+.header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.logo { font-size: 18px; }
+.title { flex: 1; font-size: 12px; font-weight: 700; letter-spacing: 3px; color: var(--primary); }
+.close-btn {
+  background: none; border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text-dim); padding: 4px 10px; border-radius: 4px; cursor: pointer;
+}
+.tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.tab {
+  flex: 1; padding: 10px; font-size: 11px; font-weight: 600;
+  background: none; border: none; color: var(--text-dim); cursor: pointer;
+  border-bottom: 2px solid transparent; transition: all 0.15s;
+}
+.tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+.content { padding: 16px; max-height: 400px; overflow-y: auto; }
+.loading { color: var(--text-dim); text-align: center; padding: 40px; }
+.record-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.rank { width: 30px; font-size: 16px; text-align: center; }
+.rname { flex: 1; font-size: 13px; }
+.rtime { font-size: 13px; font-weight: 600; color: var(--primary); }
+.rdate { font-size: 11px; color: var(--text-dim); margin-left: 6px; }
+.empty { color: var(--text-dim); text-align: center; padding: 30px; font-size: 13px; }

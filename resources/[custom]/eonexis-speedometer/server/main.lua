@@ -1,0 +1,1 @@
+-- eonexis-speedometer — server (client-only resource, no server logic needed)

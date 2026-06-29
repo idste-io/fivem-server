@@ -1,60 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Eonexis</title>
-  <link rel="stylesheet" href="style.css" />
-  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,800&display=swap" rel="stylesheet" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Eonexis RP</title>
+<link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Ambient glow orbs -->
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
 
-  <div class="container">
-    <!-- Logo / wordmark -->
-    <div class="logo-wrap">
-      <svg class="logo-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="20" cy="20" r="18" stroke="url(#grad)" stroke-width="2"/>
-        <path d="M12 20 L20 12 L28 20 L20 28 Z" fill="url(#grad)" opacity="0.9"/>
-        <circle cx="20" cy="20" r="4" fill="white" opacity="0.95"/>
-        <defs>
-          <linearGradient id="grad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stop-color="#a78bfa"/>
-            <stop offset="100%" stop-color="#7c3aed"/>
-          </linearGradient>
-        </defs>
-      </svg>
-      <span class="logo-text">Eonexis</span>
+<!-- Ambient background -->
+<div class="bg-orb orb-a"></div>
+<div class="bg-orb orb-b"></div>
+<div class="bg-orb orb-c"></div>
+<div class="bg-grid"></div>
+
+<!-- Main layout -->
+<div class="layout">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="logo-section">
+      <!-- Server logo / wordmark -->
+      <div class="logo-mark">
+        <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="logo-svg">
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#c4b5fd"/>
+              <stop offset="100%" stop-color="#7c3aed"/>
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <!-- Hex outline -->
+          <polygon points="40,4 74,22 74,58 40,76 6,58 6,22" stroke="url(#g1)" stroke-width="2.5" fill="none" filter="url(#glow)"/>
+          <!-- Inner hex -->
+          <polygon points="40,18 62,30 62,50 40,62 18,50 18,30" stroke="url(#g1)" stroke-width="1.5" fill="hsl(258,85%,65%,0.08)"/>
+          <!-- Center diamond -->
+          <polygon points="40,26 54,40 40,54 26,40" fill="url(#g1)" opacity="0.9"/>
+          <!-- Center dot -->
+          <circle cx="40" cy="40" r="5" fill="white" opacity="0.95"/>
+        </svg>
+      </div>
+      <div class="logo-text-wrap">
+        <span class="logo-name">EONEXIS</span>
+        <span class="logo-tag">Custom Roleplay Server</span>
+      </div>
     </div>
 
-    <!-- Status message -->
-    <p class="status-msg" id="statusMsg">Connecting to server...</p>
+    <div class="divider"></div>
 
-    <!-- Progress bar -->
-    <div class="progress-track">
-      <div class="progress-fill" id="progressFill"></div>
-      <div class="progress-glow" id="progressGlow"></div>
+    <div class="server-info">
+      <div class="info-row">
+        <span class="info-label">ADDRESS</span>
+        <span class="info-val">play.invoxio.work</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">PLAYERS</span>
+        <span class="info-val" id="playerCount">Loading…</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">BUILD</span>
+        <span class="info-val">GTA V Enhanced · 2944</span>
+      </div>
     </div>
 
-    <!-- Progress percent -->
-    <p class="progress-pct" id="progressPct">0%</p>
+    <div class="divider"></div>
 
-    <!-- Tips carousel -->
-    <div class="tips-wrap">
-      <p class="tips-label">TIP</p>
-      <p class="tips-text" id="tipText"></p>
+    <div class="feature-list">
+      <div class="fl-title">WHAT'S INSIDE</div>
+      <div class="feature-item"><span class="fi-dot"></span>Full economy — cash, bank, jobs</div>
+      <div class="feature-item"><span class="fi-dot"></span>Properties &amp; passive income</div>
+      <div class="feature-item"><span class="fi-dot"></span>10 story &amp; criminal quests</div>
+      <div class="feature-item"><span class="fi-dot"></span>Street racing &amp; store robberies</div>
+      <div class="feature-item"><span class="fi-dot"></span>Discord bot integration</div>
+      <div class="feature-item"><span class="fi-dot"></span>Skill tree progression</div>
+      <div class="feature-item"><span class="fi-dot"></span>30+ custom mods</div>
     </div>
   </div>
 
-  <!-- Bottom bar -->
-  <div class="bottom-bar">
-    <span class="bottom-tag">GTA V Multiplayer</span>
-    <span class="bottom-tag powered">Powered by FiveM</span>
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="right-inner">
+
+      <!-- Status + progress -->
+      <div class="loading-section">
+        <div class="loading-label" id="statusMsg">Connecting to Eonexis RP…</div>
+        <div class="progress-wrap">
+          <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <span class="progress-pct" id="progressPct">0%</span>
+        </div>
+        <div class="substatus" id="subStatus">Downloading resources…</div>
+      </div>
+
+      <!-- Tip card -->
+      <div class="tip-card">
+        <div class="tip-icon">💡</div>
+        <div class="tip-body">
+          <div class="tip-label">TIP</div>
+          <div class="tip-text" id="tipText">Press P to open your phone — it connects all your stats and apps.</div>
+        </div>
+      </div>
+
+      <!-- Mod grid -->
+      <div class="mod-grid">
+        <div class="mg-title">LOADED MODS</div>
+        <div class="mg-items" id="modGrid">
+          <span class="mg-item">Economy</span>
+          <span class="mg-item">Jobs</span>
+          <span class="mg-item">Properties</span>
+          <span class="mg-item">Vehicles</span>
+          <span class="mg-item">Quests</span>
+          <span class="mg-item">Racing</span>
+          <span class="mg-item">Casino</span>
+          <span class="mg-item">Robbery</span>
+          <span class="mg-item">Phone</span>
+          <span class="mg-item">Skill Tree</span>
+          <span class="mg-item">Discord Link</span>
+          <span class="mg-item">Anti-Cheat</span>
+          <span class="mg-item">Character</span>
+          <span class="mg-item">Weather</span>
+          <span class="mg-item">HUD</span>
+          <span class="mg-item">Hunger</span>
+          <span class="mg-item">Fuel</span>
+          <span class="mg-item">GPS</span>
+          <span class="mg-item">Emotes</span>
+          <span class="mg-item">Shops</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="bottom-bar">
+      <span class="bb-left">Eonexis RP &copy; IDSTE Co.</span>
+      <span class="bb-right">Powered by FiveM</span>
+    </div>
   </div>
 
-  <script src="script.js"></script>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>

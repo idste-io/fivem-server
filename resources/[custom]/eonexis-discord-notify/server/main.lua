@@ -75,13 +75,11 @@ local function statusEmbed()
     }
 end
 
--- Player join
-AddEventHandler('playerConnecting', function(name, _, deferrals)
-    local src = source
-    deferrals.defer()
-    Wait(0)
+-- Player join — use playerJoining instead of playerConnecting to avoid deferral issues
+AddEventHandler('playerJoining', function(oldId)
+    local src  = source
+    local name = GetPlayerName(src) or 'Unknown'
     sendWebhook(joinEmbed(name, src))
-    deferrals.done()
 end)
 
 -- Player leave

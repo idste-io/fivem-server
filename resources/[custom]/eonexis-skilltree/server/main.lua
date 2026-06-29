@@ -94,35 +94,33 @@ AddEventHandler('eonexis-skilltree:complete', function(skillId)
     end
 end)
 
--- Auto-complete 'welcome' on join
-AddEventHandler('playerConnecting', function(name, _, deferrals)
+-- Auto-complete 'welcome' on join — use playerJoining (NOT playerConnecting deferral)
+AddEventHandler('playerJoining', function()
     local src = source
-    deferrals.defer()
-    Wait(0)
-    local rec, lic = getRecord(src)
-    if rec and not rec.completed['welcome'] then
-        rec.completed['welcome'] = true
-        saveDB()
-    end
-    deferrals.done()
+    Citizen.SetTimeout(3000, function()   -- 3s delay so identity is ready
+        local rec, lic = getRecord(src)
+        if rec and not rec.completed['welcome'] then
+            completeSkill(src, 'welcome')
+        end
+    end)
 end)
 
 -- Track task count (fired by jobs mod)
-RegisterNetEvent('eonexis-skilltree:taskDone')
 AddEventHandler('eonexis-skilltree:taskDone', function()
     local src = source
     local rec = getRecord(src)
     if not rec then return end
     rec.taskCount = (rec.taskCount or 0) + 1
-    -- Auto-complete first_task after 1 task
-    if rec.taskCount >= 1 and not rec.completed['first_task'] then
-        completeSkill(src, 'first_task')
-    end
-    -- Auto-complete complete_5_tasks after 5
-    if rec.taskCount >= 5 and not rec.completed['complete_5_tasks'] then
-        completeSkill(src, 'complete_5_tasks')
-    end
+    if rec.taskCount >= 1  and not rec.completed['first_task']      then completeSkill(src, 'first_task') end
+    if rec.taskCount >= 5  and not rec.completed['complete_5_tasks'] then completeSkill(src, 'complete_5_tasks') end
+    if rec.taskCount >= 10 and not rec.completed['complete_10_tasks'] then completeSkill(src, 'complete_10_tasks') end
     saveDB()
+end)
+
+-- License purchased (server-side hook)
+AddEventHandler('eonexis-jobs:onLicensePurchased', function(src, licId)
+    completeSkill(src, 'buy_license')
+    TriggerEvent('eonexis-quests:objectiveDone', src, 'license_purchased')
 end)
 
 -- Export: get player completed skills (for other mods to check)

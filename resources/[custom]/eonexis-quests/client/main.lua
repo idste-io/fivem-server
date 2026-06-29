@@ -3,6 +3,7 @@
 local open      = false
 local questData = {}   -- [questId] = { completed=bool, objectives={[objId]=bool} }
 local activeLocation = nil  -- location objective being checked
+local questBlips = {}  -- minimap blips for active location objectives
 
 local function notify(msg, t)
     if exports['eonexis-notify'] then
@@ -56,6 +57,14 @@ end
 
 RegisterNUICallback('close', function(_, cb) cb({}); closeLog() end)
 
+RegisterNUICallback('waypoint', function(data, cb)
+    cb({})
+    if data.x and data.y then
+        SetNewWaypoint(data.x, data.y)
+        notify('Waypoint set!', 'info')
+    end
+end)
+
 -- ── Key binding ───────────────────────────────────────────────────────────────
 
 RegisterKeyMapping('questlog', 'Open Quest Log', 'keyboard', 'q')
@@ -92,31 +101,48 @@ AddEventHandler('eonexis-quests:questComplete', function(questId, questTitle, re
     refreshLocationTracking()
 end)
 
--- ── Location tracking ─────────────────────────────────────────────────────────
+-- ── Location tracking + blips ──────────────────────────────────────────────────
+
+local function clearQuestBlips()
+    for _, b in ipairs(questBlips) do
+        if DoesBlipExist(b) then RemoveBlip(b) end
+    end
+    questBlips = {}
+end
 
 function refreshLocationTracking()
-    -- Build list of active location objectives
+    clearQuestBlips()
     activeLocation = nil
     for _, q in ipairs(Config.Quests) do
         local state = questData[q.id] or { completed=false, objectives={} }
         if not state.completed then
-            for _, obj in ipairs(q.objectives) do
-                if obj.trigger == 'location' and not state.objectives[obj.id] then
-                    -- Check if quest is available
-                    local available = true
-                    for _, req in ipairs(q.requires) do
-                        if not (questData[req] and questData[req].completed) then
-                            available = false; break
+            -- Check availability
+            local available = true
+            for _, req in ipairs(q.requires) do
+                if not (questData[req] and questData[req].completed) then
+                    available = false; break
+                end
+            end
+            if available then
+                for _, obj in ipairs(q.objectives) do
+                    if obj.trigger == 'location' and not state.objectives[obj.id] then
+                        -- Add minimap blip
+                        local b = AddBlipForCoord(obj.pos.x, obj.pos.y, obj.pos.z)
+                        SetBlipSprite(b, 161); SetBlipColour(b, 2); SetBlipScale(b, 0.75)
+                        SetBlipAsShortRange(b, true)
+                        BeginTextCommandSetBlipName('STRING')
+                        AddTextComponentSubstringPlayerName('[Quest] ' .. q.title)
+                        EndTextCommandSetBlipName(b)
+                        table.insert(questBlips, b)
+
+                        -- Set activeLocation to first pending one
+                        if not activeLocation then
+                            activeLocation = { questId=q.id, objId=obj.id, pos=obj.pos, radius=obj.radius }
                         end
-                    end
-                    if available then
-                        activeLocation = { questId=q.id, objId=obj.id, pos=obj.pos, radius=obj.radius }
-                        break
                     end
                 end
             end
         end
-        if activeLocation then break end
     end
 end
 

@@ -81,6 +81,14 @@ RegisterNUICallback('complete', function(data, cb)
     TriggerServerEvent('eonexis-skilltree:complete', data.id)
 end)
 
+RegisterNUICallback('setWaypoint', function(data, cb)
+    cb({})
+    if data.x and data.y then
+        SetNewWaypoint(data.x, data.y)
+        notify('Waypoint set!', 'info')
+    end
+end)
+
 -- ── Server events ─────────────────────────────────────────────────────────────
 
 RegisterNetEvent('eonexis-skilltree:update')

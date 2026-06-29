@@ -97,6 +97,16 @@ AddEventHandler('eonexis-character:save', function(data)
     if isNew then
         notify(src, 'Character created! Welcome to Eonexis.', 'success')
         TriggerEvent('eonexis-quests:objectiveDone', src, 'character_created')
+        -- Notify bot admin channel: new player first join
+        PerformHttpRequest('http://127.0.0.1:3001/event', function() end, 'POST',
+            json.encode({
+                type    = 'newplayer',
+                name    = db[id].name,
+                license = id,
+                gender  = db[id].gender,
+                server_id = src,
+            }),
+            { ['Content-Type'] = 'application/json', ['X-Bot-Secret'] = 'eonexis_bot_secret_2024_xK9mQ' })
     else
         notify(src, 'Character updated.', 'success')
     end

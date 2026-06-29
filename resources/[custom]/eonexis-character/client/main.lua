@@ -97,10 +97,12 @@ RegisterNUICallback('closeCharacter', function(_, cb)
     closeNUI()
 end)
 
--- ── Load on spawn ─────────────────────────────────────────────────────────────
+-- ── Load after spawn is fully done ────────────────────────────────────────────
+-- Listen for sessionmanager:playerLoaded (fired by eonexis-spawn after spawn completes)
+-- This ensures the spawn chooser NUI is already closed before we open character creator
 
-AddEventHandler('onClientGameTypeStart', function()
-    Wait(2000)
+AddEventHandler('sessionmanager:playerLoaded', function()
+    Wait(1000)  -- brief pause after spawn
     TriggerServerEvent('eonexis-character:load')
 end)
 

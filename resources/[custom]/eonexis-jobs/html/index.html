@@ -6,23 +6,54 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+<!-- ── JOB CENTER ─────────────────────────────────────────────────────────── -->
 <div id="overlay" class="hidden">
-  <div class="panel">
+  <div class="panel" id="panel">
+    <div class="resize-handle" id="resizeHandle"></div>
     <div class="header">
       <div class="logo">EONEXIS</div>
       <h2>Job Center</h2>
       <button class="close-btn" onclick="close_()">✕</button>
     </div>
+
     <div id="current-job-bar" class="hidden">
       <span id="current-label"></span>
       <div style="display:flex;gap:8px">
-        <button class="btn-small btn-work" onclick="startShift()">▶ Start Shift</button>
+        <button class="btn-small btn-work" onclick="startShift()">▶ Shift</button>
         <button class="btn-small btn-quit" onclick="quitJob()">Quit</button>
       </div>
     </div>
+
+    <div class="search-row">
+      <input id="searchInput" type="text" placeholder="Search jobs…" oninput="filterJobs()" />
+    </div>
+
     <div id="job-list"></div>
   </div>
 </div>
+
+<!-- ── LICENSE PURCHASE POPUP ─────────────────────────────────────────────── -->
+<div id="lic-overlay" class="hidden">
+  <div class="lic-panel">
+    <div class="header">
+      <div class="logo">LICENSE</div>
+      <h2 id="licTitle">Purchase License</h2>
+      <button class="close-btn" onclick="closeLic()">✕</button>
+    </div>
+    <div class="lic-body">
+      <div id="licIcon" class="lic-icon">📄</div>
+      <div id="licDesc" class="lic-desc"></div>
+      <div class="lic-cost-row">
+        <span class="lic-cost-label">Cost</span>
+        <span id="licCost" class="lic-cost-val"></span>
+      </div>
+      <div id="licOwnedBadge" class="lic-owned hidden">✅ Already owned</div>
+      <button id="licBuyBtn" class="btn-buy" onclick="buyLic()">Purchase License</button>
+    </div>
+  </div>
+</div>
+
 <script src="script.js"></script>
 </body>
 </html>

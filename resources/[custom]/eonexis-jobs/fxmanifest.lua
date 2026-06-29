@@ -10,4 +10,5 @@ client_scripts  { 'client/*.lua' }
 server_scripts  { 'server/*.lua' }
 shared_scripts  { 'shared/*.lua' }
 ui_page         'html/index.html'
-files           { 'html/index.html', 'html/style.css', 'html/script.js' }
+files           { 'html/index.html', 'html/style.css', 'html/script.js', 'data/licenses.json' }
+server_only     false

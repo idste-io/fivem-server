@@ -1,0 +1,72 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: transparent; font-family: 'Segoe UI', sans-serif; }
+
+#toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: hsl(240 15% 8% / 0.96);
+  border: 1px solid hsl(258 85% 65% / 0.4);
+  border-radius: 12px;
+  padding: 16px;
+  max-width: 300px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  animation: slideIn 0.3s ease;
+}
+
+#toast.hidden { display: none; }
+
+.icon {
+  width: 40px; height: 40px;
+  border-radius: 8px;
+  background: hsl(235 86% 65%);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.body { flex: 1; }
+
+.title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.4;
+  margin-bottom: 10px;
+}
+
+.actions { display: flex; gap: 8px; }
+
+button {
+  border: none;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+button:hover { opacity: 0.85; }
+
+#btn-join {
+  background: hsl(235 86% 65%);
+  color: #fff;
+}
+
+#btn-dismiss {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.6);
+}
+
+@keyframes slideIn {
+  from { transform: translateX(20px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}

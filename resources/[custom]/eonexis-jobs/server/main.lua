@@ -58,6 +58,14 @@ AddEventHandler('eonexis-jobs:selectJob', function(jobId)
     TriggerClientEvent('eonexis-jobs:setJob', src, jobId)
     notify(src, ('You are now a %s. Type /work to get a task.'):format(jobId), 'success')
     print(('[jobs] %s selected job: %s'):format(GetPlayerName(src), jobId))
+
+    -- Spawn job vehicle if this job has one
+    for _, j in ipairs(Config.Jobs) do
+        if j.id == jobId and j.vehicle then
+            TriggerClientEvent('eonexis-jobs:spawnWorkVehicle', src, j.vehicle)
+            break
+        end
+    end
 end)
 
 RegisterNetEvent('eonexis-jobs:quitJob')

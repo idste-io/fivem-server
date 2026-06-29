@@ -1,0 +1,2 @@
+-- eonexis-hunger — server (no server-side state needed; hunger is client-side)
+-- This file intentionally minimal — hunger resets on reconnect by design.

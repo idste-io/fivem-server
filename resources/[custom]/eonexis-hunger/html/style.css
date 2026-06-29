@@ -1,0 +1,49 @@
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:transparent; font-family:'Segoe UI',sans-serif; }
+
+.hidden { display:none !important; }
+
+#bars {
+  position: fixed;
+  bottom: 110px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(0,0,0,0.45);
+  padding: 4px 8px 4px 6px;
+  border-radius: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.icon { font-size: 0.85rem; line-height: 1; }
+
+.bar-track {
+  width: 90px;
+  height: 6px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.bar-fill.hunger { background: #e67e22; }
+.bar-fill.thirst { background: #3498db; }
+
+.val {
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.7);
+  width: 28px;
+  text-align: right;
+}

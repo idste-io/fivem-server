@@ -29,12 +29,14 @@ RegisterCommand('useitem', function(src, args)
     local ok = exports['eonexis-economy']:removeItem(src, itemId, 1)
     if not ok then notify(src, 'You do not have that item.', 'error'); return end
 
-    if itemDef.heal then
+    if itemDef.heal and itemDef.heal > 0 then
         TriggerClientEvent('eonexis-inventory:heal', src, itemDef.heal)
         notify(src, string.format('Used %s — restored %d HP.', itemDef.label, itemDef.heal), 'success')
     else
         notify(src, string.format('Used %s.', itemDef.label), 'info')
     end
+    -- Notify hunger mod so it can update hunger/thirst bars
+    TriggerClientEvent('eonexis-hunger:itemUsed', src, itemId)
 end, false)
 
 TriggerEvent('chat:addSuggestion', '/inv',     'Show your inventory', {})

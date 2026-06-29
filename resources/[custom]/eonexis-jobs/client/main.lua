@@ -6,6 +6,7 @@ local menuOpen     = false
 local fishing      = false
 local guarding     = false
 local guardTimer   = 0
+local workVehicle  = nil   -- current spawned job vehicle entity
 
 local function notify(msg, t)
     if exports['eonexis-notify'] then
@@ -32,11 +33,52 @@ local function setTaskBlip(pos, label, colour)
     return blip
 end
 
+-- Spawn / delete work vehicle
+local function deleteWorkVehicle()
+    if workVehicle and DoesEntityExist(workVehicle) then
+        DeleteVehicle(workVehicle)
+    end
+    workVehicle = nil
+end
+
+RegisterNetEvent('eonexis-jobs:spawnWorkVehicle')
+AddEventHandler('eonexis-jobs:spawnWorkVehicle', function(model)
+    deleteWorkVehicle()
+    local hash = GetHashKey(model)
+    RequestModel(hash)
+    local t = 0
+    while not HasModelLoaded(hash) do
+        Wait(100)
+        t = t + 100
+        if t > 10000 then
+            notify('Could not load job vehicle model.', 'error')
+            return
+        end
+    end
+    local ped = PlayerPedId()
+    local pos = GetEntityCoords(ped)
+    local hdg = GetEntityHeading(ped)
+    -- Spawn 4m in front of player
+    local fwd = GetEntityForwardVector(ped)
+    workVehicle = CreateVehicle(hash, pos.x + fwd.x * 4, pos.y + fwd.y * 4, pos.z, hdg, true, false)
+    SetEntityAsMissionEntity(workVehicle, true, true)
+    SetVehicleEngineOn(workVehicle, true, true, false)
+    TaskWarpPedIntoVehicle(ped, workVehicle, -1)
+    SetModelAsNoLongerNeeded(hash)
+    notify('Your work vehicle is ready!', 'success')
+end)
+
+RegisterNetEvent('eonexis-jobs:deleteWorkVehicle')
+AddEventHandler('eonexis-jobs:deleteWorkVehicle', function()
+    deleteWorkVehicle()
+end)
+
 -- Receive job assignment from server
 RegisterNetEvent('eonexis-jobs:setJob')
 AddEventHandler('eonexis-jobs:setJob', function(jobId)
     currentJob = jobId
     clearTask()
+    deleteWorkVehicle()
 end)
 
 RegisterNetEvent('eonexis-jobs:startTask')

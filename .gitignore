@@ -1,0 +1,4 @@
+# Never commit the license key — edit server.cfg locally only
+# or use an env var substitution in update.sh
+*.local
+.env

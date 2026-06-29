@@ -49,14 +49,14 @@ window.addEventListener('message', function(e) {
     if (d.action === 'showDealer') {
         mode = 'dealer'; activeCategory = 'All';
         allVehicles = d.vehicles;
-        document.getElementById('panel-title').textContent = 'Premium Deluxe Motorsport';
+        document.getElementById('panel-title').textContent = d.dealerName || 'Dealership';
         renderCategories(d.vehicles);
         renderVehicles(d.vehicles);
         document.getElementById('overlay').classList.remove('hidden');
     } else if (d.action === 'showGarage') {
         mode = 'garage'; activeCategory = 'All';
         allVehicles = d.vehicles;
-        document.getElementById('panel-title').textContent = 'My Garage';
+        document.getElementById('panel-title').textContent = d.dealerName || 'My Garage';
         renderCategories(d.vehicles);
         renderVehicles(d.vehicles);
         document.getElementById('overlay').classList.remove('hidden');

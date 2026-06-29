@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Eonexis Casino</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="casino" class="hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>🎰 Lucky Wheel</h2>
+      <button class="btn-close" onclick="post('close')">✕</button>
+    </div>
+    <div class="wheel-wrap">
+      <canvas id="wheel" width="320" height="320"></canvas>
+      <div class="needle">▼</div>
+    </div>
+    <div id="result-msg" class="result-msg hidden"></div>
+    <div class="spin-footer">
+      <span class="cost-label">Cost: <strong id="spin-cost">$500</strong></span>
+      <button id="btn-spin" class="btn-spin" onclick="doSpin()">SPIN</button>
+    </div>
+    <p class="hint">Spin once per hour. Stand at the golden marker.</p>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Eonexis Phone</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="phone" class="hidden">
+  <div class="screen">
+    <div class="status-bar">
+      <span id="clock">12:00</span>
+      <span class="signal">●●●●</span>
+    </div>
+
+    <!-- HOME SCREEN -->
+    <div id="home-screen" class="app-screen active">
+      <div class="wallpaper-logo">EONEXIS</div>
+      <div class="app-grid">
+        <button class="app-icon" onclick="openApp('spawn')">  <div class="icon">🪂</div><div class="lbl">Spawn</div>     </button>
+        <button class="app-icon" onclick="openApp('bank')">   <div class="icon">💰</div><div class="lbl">Bank</div>      </button>
+        <button class="app-icon" onclick="openApp('jobs')">   <div class="icon">💼</div><div class="lbl">Jobs</div>      </button>
+        <button class="app-icon" onclick="openApp('players')"><div class="icon">👥</div><div class="lbl">Players</div>   </button>
+        <button class="app-icon" onclick="openApp('inv')">    <div class="icon">📦</div><div class="lbl">Inventory</div></button>
+        <button class="app-icon" onclick="openApp('gps')">    <div class="icon">🗺️</div><div class="lbl">GPS</div>       </button>
+      </div>
+      <button class="close-phone" onclick="post('close')">✕ Close</button>
+    </div>
+
+    <!-- SPAWN APP -->
+    <div id="app-spawn" class="app-screen">
+      <div class="app-bar"><button onclick="goHome()">←</button><h3>Fast Travel</h3></div>
+      <div class="app-body" id="spawn-list"></div>
+    </div>
+
+    <!-- BANK APP -->
+    <div id="app-bank" class="app-screen">
+      <div class="app-bar"><button onclick="goHome()">←</button><h3>Maze Bank</h3></div>
+      <div class="app-body">
+        <div class="bank-row"><span>Cash</span><strong id="b-cash">$0</strong></div>
+        <div class="bank-row"><span>Bank</span><strong id="b-bank">$0</strong></div>
+        <div class="bank-input">
+          <input type="number" id="txAmount" placeholder="Amount" min="1">
+          <button onclick="doDeposit()">Deposit</button>
+          <button onclick="doWithdraw()">Withdraw</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- JOBS APP -->
+    <div id="app-jobs" class="app-screen">
+      <div class="app-bar"><button onclick="goHome()">←</button><h3>Jobs</h3></div>
+      <div class="app-body">
+        <div class="bank-row"><span>Current Job</span><strong id="j-current">unemployed</strong></div>
+        <button class="full-btn" onclick="post('requestWork')">▶ Get Next Task</button>
+        <p class="hint">Visit the Job Center (yellow marker) to change jobs.</p>
+      </div>
+    </div>
+
+    <!-- PLAYERS APP -->
+    <div id="app-players" class="app-screen">
+      <div class="app-bar"><button onclick="goHome()">←</button><h3>Online Players</h3></div>
+      <div class="app-body" id="player-list"><p class="hint">Loading...</p></div>
+    </div>
+
+    <!-- INVENTORY APP -->
+    <div id="app-inv" class="app-screen">
+      <div class="app-bar"><button onclick="goHome()">←</button><h3>Inventory</h3></div>
+      <div class="app-body">
+        <button class="full-btn" onclick="post('openInventory')">Open Full Inventory</button>
+        <p class="hint">Opens the inventory overlay (TAB key also works).</p>
+      </div>
+    </div>
+
+    <!-- GPS APP -->
+    <div id="app-gps" class="app-screen">
+      <div class="app-bar"><button onclick="goHome()">←</button><h3>GPS</h3></div>
+      <div class="app-body" id="gps-list"></div>
+    </div>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

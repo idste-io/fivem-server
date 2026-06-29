@@ -1,9 +1,9 @@
--- eonexis-vehicles — client
+-- eonexis-vehicles — client (multi-dealership)
 
 local menuOpen    = false
-local menuMode    = nil   -- 'dealer' | 'garage'
+local menuMode    = nil
 local ownedVehs   = {}
-local activeVeh   = nil   -- spawned owned vehicle entity
+local activeDlr   = nil
 
 local function notify(msg, t)
     if exports['eonexis-notify'] then
@@ -11,7 +11,6 @@ local function notify(msg, t)
     end
 end
 
--- Receive owned vehicle list
 RegisterNetEvent('eonexis-vehicles:receiveOwned')
 AddEventHandler('eonexis-vehicles:receiveOwned', function(vehs)
     ownedVehs = vehs or {}
@@ -22,11 +21,16 @@ AddEventHandler('onClientGameTypeStart', function()
     TriggerServerEvent('eonexis-vehicles:requestOwned')
 end)
 
-local function openDealer()
+local function openDealer(dlr)
     if menuOpen then return end
-    menuOpen = true; menuMode = 'dealer'
+    menuOpen = true; menuMode = 'dealer'; activeDlr = dlr
+    -- Filter vehicles by this dealership
+    local list = {}
+    for _, v in ipairs(Config.Vehicles) do
+        if v.dealer == dlr.id then table.insert(list, v) end
+    end
     SetNuiFocus(true, true)
-    SendNUIMessage({ action='showDealer', vehicles=Config.Vehicles })
+    SendNUIMessage({ action='showDealer', vehicles=list, dealerName=dlr.label })
 end
 
 local function openGarage()
@@ -39,10 +43,9 @@ local function openGarage()
         end
     end
     SetNuiFocus(true, true)
-    SendNUIMessage({ action='showGarage', vehicles=list })
+    SendNUIMessage({ action='showGarage', vehicles=list, dealerName='My Garage' })
 end
 
--- NUI callbacks
 RegisterNUICallback('buy', function(data, cb)
     cb({})
     TriggerServerEvent('eonexis-vehicles:buy', data.model)
@@ -65,7 +68,6 @@ RegisterNUICallback('close', function(_, cb)
     SendNUIMessage({ action='hide' })
 end)
 
--- Server spawns vehicle
 RegisterNetEvent('eonexis-vehicles:spawnVehicle')
 AddEventHandler('eonexis-vehicles:spawnVehicle', function(model, isNew)
     menuOpen = false; menuMode = nil
@@ -75,77 +77,78 @@ AddEventHandler('eonexis-vehicles:spawnVehicle', function(model, isNew)
     local hash = GetHashKey(model)
     RequestModel(hash)
     local t = 0
-    while not HasModelLoaded(hash) do Wait(100); t = t + 100; if t > 10000 then return end end
+    while not HasModelLoaded(hash) and t < 10000 do Wait(100); t = t + 100 end
+    if not HasModelLoaded(hash) then notify('Vehicle model failed to load.', 'error'); return end
 
-    local sp = Config.DealershipSpawn
-    if not isNew then sp = Config.GarageSpawn end
+    local sp = (isNew and activeDlr and activeDlr.spawnPos) or Config.GarageSpawn
     local veh = CreateVehicle(hash, sp.x, sp.y, sp.z, 0.0, true, false)
     SetPedIntoVehicle(PlayerPedId(), veh, -1)
     SetEntityAsNoLongerNeeded(veh)
     SetModelAsNoLongerNeeded(hash)
-    activeVeh = veh
 
-    if isNew then
-        -- New purchase: nice color
-        SetVehicleColours(veh, 111, 111)
-        notify('Enjoy your new vehicle!', 'success')
-    else
-        notify('Vehicle retrieved from garage.', 'info')
-    end
+    if isNew then SetVehicleColours(veh, 111, 111) end
+    notify(isNew and 'Enjoy your new vehicle!' or 'Vehicle retrieved.', 'success')
 end)
 
 RegisterNetEvent('eonexis-vehicles:bought')
-AddEventHandler('eonexis-vehicles:bought', function(model)
-    table.insert(ownedVehs, model)
-end)
+AddEventHandler('eonexis-vehicles:bought', function(model) table.insert(ownedVehs, model) end)
 
 RegisterNetEvent('eonexis-vehicles:sold')
 AddEventHandler('eonexis-vehicles:sold', function(model)
-    for i, v in ipairs(ownedVehs) do
-        if v == model then table.remove(ownedVehs, i); break end
-    end
+    for i, v in ipairs(ownedVehs) do if v == model then table.remove(ownedVehs, i); break end end
 end)
 
--- Draw markers + prompts
+-- Blips, markers, and proximity
 CreateThread(function()
-    -- Dealership blip
-    local dBlip = AddBlipForCoord(Config.DealershipPos.x, Config.DealershipPos.y, Config.DealershipPos.z)
-    SetBlipSprite(dBlip, 326); SetBlipScale(dBlip, 0.8); SetBlipColour(dBlip, 3)
-    SetBlipAsShortRange(dBlip, true)
-    BeginTextCommandSetBlipName('STRING'); AddTextComponentSubstringPlayerName('Premium Deluxe Motorsport'); EndTextCommandSetBlipName(dBlip)
-
-    local gBlip = AddBlipForCoord(Config.GaragePos.x, Config.GaragePos.y, Config.GaragePos.z)
-    SetBlipSprite(gBlip, 357); SetBlipScale(gBlip, 0.8); SetBlipColour(gBlip, 5)
-    SetBlipAsShortRange(gBlip, true)
-    BeginTextCommandSetBlipName('STRING'); AddTextComponentSubstringPlayerName('My Garage'); EndTextCommandSetBlipName(gBlip)
+    -- Dealership blips
+    for _, dlr in ipairs(Config.Dealerships) do
+        local b = AddBlipForCoord(dlr.pos.x, dlr.pos.y, dlr.pos.z)
+        SetBlipSprite(b, dlr.blipIcon); SetBlipScale(b, 0.8); SetBlipColour(b, dlr.blipColour)
+        SetBlipAsShortRange(b, true)
+        BeginTextCommandSetBlipName('STRING'); AddTextComponentSubstringPlayerName(dlr.label); EndTextCommandSetBlipName(b)
+    end
+    -- Garage blip
+    local gb = AddBlipForCoord(Config.GaragePos.x, Config.GaragePos.y, Config.GaragePos.z)
+    SetBlipSprite(gb, 357); SetBlipScale(gb, 0.8); SetBlipColour(gb, 5); SetBlipAsShortRange(gb, true)
+    BeginTextCommandSetBlipName('STRING'); AddTextComponentSubstringPlayerName('My Garage'); EndTextCommandSetBlipName(gb)
 
     while true do
         Wait(0)
         local myPos = GetEntityCoords(PlayerPedId())
 
-        -- Dealership
-        local dDist = #(myPos - Config.DealershipPos)
-        DrawMarker(1, Config.DealershipPos.x, Config.DealershipPos.y, Config.DealershipPos.z - 0.5,
-            0,0,0, 0,0,0, 2.0,2.0,0.5, 255,165,0, 120, false, true, 2, false, nil, nil, false)
-        if dDist < 2.5 then
-            BeginTextCommandDisplayHelp('STRING')
-            AddTextComponentSubstringPlayerName('~INPUT_CONTEXT~ Open Dealership')
-            EndTextCommandDisplayHelp(0, false, true, -1)
-            if IsControlJustPressed(0, 38) and not menuOpen then openDealer() end
+        -- Check each dealership
+        for _, dlr in ipairs(Config.Dealerships) do
+            local dist = #(myPos - dlr.pos)
+            if dist < 60 then
+                DrawMarker(1, dlr.pos.x, dlr.pos.y, dlr.pos.z - 0.5,
+                    0,0,0, 0,0,0, 2.5,2.5,0.7, 255,165,0, 120, false, true, 2, false, nil, nil, false)
+            end
+            if dist < 3.0 then
+                BeginTextCommandDisplayHelp('STRING')
+                AddTextComponentSubstringPlayerName('~INPUT_CONTEXT~ ' .. dlr.label)
+                EndTextCommandDisplayHelp(0, false, true, -1)
+                if (IsControlJustPressed(0, 38) or IsControlJustPressed(0, 176)) and not menuOpen then
+                    openDealer(dlr)
+                end
+            end
         end
 
         -- Garage
         local gDist = #(myPos - Config.GaragePos)
-        DrawMarker(1, Config.GaragePos.x, Config.GaragePos.y, Config.GaragePos.z - 0.5,
-            0,0,0, 0,0,0, 2.0,2.0,0.5, 80,200,80, 120, false, true, 2, false, nil, nil, false)
-        if gDist < 2.5 then
-            BeginTextCommandDisplayHelp('STRING')
-            AddTextComponentSubstringPlayerName('~INPUT_CONTEXT~ Open Garage')
-            EndTextCommandDisplayHelp(0, false, true, -1)
-            if IsControlJustPressed(0, 38) and not menuOpen then openGarage() end
+        if gDist < 60 then
+            DrawMarker(1, Config.GaragePos.x, Config.GaragePos.y, Config.GaragePos.z - 0.5,
+                0,0,0, 0,0,0, 2.5,2.5,0.7, 80,200,80, 120, false, true, 2, false, nil, nil, false)
         end
-
-        -- Controller: also accept DPAD_RIGHT (same input id on gamepad)
-        if IsControlJustPressed(0, 38) then end  -- already handled above
+        if gDist < 3.0 then
+            BeginTextCommandDisplayHelp('STRING')
+            AddTextComponentSubstringPlayerName('~INPUT_CONTEXT~ My Garage')
+            EndTextCommandDisplayHelp(0, false, true, -1)
+            if (IsControlJustPressed(0, 38) or IsControlJustPressed(0, 176)) and not menuOpen then
+                openGarage()
+            end
+        end
     end
 end)
+
+-- Event hook for controller shortcut
+AddEventHandler('eonexis-vehicles:openGarage', function() openGarage() end)

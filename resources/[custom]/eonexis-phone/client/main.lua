@@ -1,0 +1,190 @@
+-- eonexis-phone — client
+
+local phoneOpen  = false
+local activeApp  = nil
+local cash       = 0
+local bank       = 0
+local job        = 'unemployed'
+
+local function notify(msg, t)
+    if exports['eonexis-notify'] then
+        exports['eonexis-notify']:Notify('Phone', msg, t or 'info', 4000)
+    end
+end
+
+local function sendSpawnLocs()
+    local locs = {}
+    for _, l in ipairs(Config.SpawnLocations) do
+        table.insert(locs, { id=l.id, label=l.label, desc=l.desc })
+    end
+    SendNUIMessage({ action='setSpawnLocs', locs=locs })
+end
+
+local function sendGPSLocs()
+    local ok, locs = pcall(function() return exports['eonexis-gps']:getGPSLocations() end)
+    if ok and locs then SendNUIMessage({ action='setGPSLocs', locs=locs }) end
+end
+
+local function openPhone()
+    if phoneOpen then return end
+    phoneOpen = true
+    SetNuiFocus(true, true)
+    SendNUIMessage({ action='open', cash=cash, bank=bank, job=job })
+    sendSpawnLocs()
+    sendGPSLocs()
+end
+
+local function closePhone()
+    phoneOpen = false
+    SetNuiFocus(false, false)
+    SendNUIMessage({ action='close' })
+end
+
+-- Toggle phone: P key or controller SELECT/BACK (196) or Menu button hold
+RegisterKeyMapping('+openphone', 'Open Eonexis Phone', 'keyboard', 'p')
+RegisterCommand('+openphone', function()
+    if phoneOpen then closePhone() else openPhone() end
+end, false)
+
+-- Controller: BACK/SELECT button (196) opens phone
+CreateThread(function()
+    while true do
+        Wait(0)
+        if not IsUsingKeyboard(2) then
+            -- Hold BACK (196) for 0.6s to open phone without conflicting with menu
+            if IsControlPressed(0, 196) then
+                Wait(600)
+                if IsControlPressed(0, 196) then
+                    if phoneOpen then closePhone() else openPhone() end
+                    Wait(500)
+                end
+            end
+        end
+    end
+end)
+
+-- Receive economy data updates
+RegisterNetEvent('eonexis-economy:updateCash')
+AddEventHandler('eonexis-economy:updateCash', function(v)
+    cash = v
+    if phoneOpen then SendNUIMessage({ action='updateMoney', cash=v, bank=bank }) end
+end)
+
+RegisterNetEvent('eonexis-economy:updateBank')
+AddEventHandler('eonexis-economy:updateBank', function(v)
+    bank = v
+    if phoneOpen then SendNUIMessage({ action='updateMoney', cash=cash, bank=v }) end
+end)
+
+RegisterNetEvent('eonexis-economy:updateJob')
+AddEventHandler('eonexis-economy:updateJob', function(v) job = v end)
+
+RegisterNetEvent('eonexis-economy:receiveData')
+AddEventHandler('eonexis-economy:receiveData', function(d)
+    cash = d.cash; bank = d.bank; job = d.job
+end)
+
+-- NUI callbacks
+RegisterNUICallback('close', function(_, cb)
+    cb({})
+    closePhone()
+end)
+
+RegisterNUICallback('deposit', function(data, cb)
+    cb({})
+    TriggerServerEvent('eonexis-phone:deposit', tonumber(data.amount))
+end)
+
+RegisterNUICallback('withdraw', function(data, cb)
+    cb({})
+    TriggerServerEvent('eonexis-phone:withdraw', tonumber(data.amount))
+end)
+
+RegisterNUICallback('requestWork', function(_, cb)
+    cb({})
+    closePhone()
+    TriggerServerEvent('eonexis-jobs:requestTask', job)
+end)
+
+RegisterNUICallback('openInventory', function(_, cb)
+    cb({})
+    closePhone()
+    TriggerEvent('eonexis-inventory:open')
+end)
+
+RegisterNUICallback('getPlayers', function(_, cb)
+    cb({})
+    TriggerServerEvent('eonexis-phone:getPlayers')
+end)
+
+RegisterNetEvent('eonexis-phone:receivePlayerList')
+AddEventHandler('eonexis-phone:receivePlayerList', function(players)
+    SendNUIMessage({ action='showPlayers', players=players })
+end)
+
+-- ── Spawn App ────────────────────────────────────────────────────────────────
+
+RegisterNUICallback('spawnParachute', function(data, cb)
+    cb({})
+    closePhone()
+
+    local loc = nil
+    for _, l in ipairs(Config.SpawnLocations) do
+        if l.id == data.id then loc = l; break end
+    end
+    if not loc then return end
+
+    -- Give parachute and teleport high above location
+    local ped = PlayerPedId()
+    GiveWeaponToPed(ped, GetHashKey('gadget_parachute'), 1, false, true)
+    SetEntityCoords(ped, loc.x, loc.y, loc.airZ, false, false, false, true)
+    -- Let gravity take over — player opens chute
+
+    notify('Parachute activated! Pull chute with F!', 'info')
+end)
+
+RegisterNUICallback('spawnBuilding', function(data, cb)
+    cb({})
+    TriggerServerEvent('eonexis-phone:buildingSpawn', data.id)
+end)
+
+RegisterNetEvent('eonexis-phone:doSpawn')
+AddEventHandler('eonexis-phone:doSpawn', function(loc)
+    closePhone()
+    local ped = PlayerPedId()
+    SetEntityCoords(ped, loc.x, loc.y, loc.z + 0.5, false, false, false, true)
+    notify('Spawned at ' .. loc.label, 'success')
+end)
+
+RegisterNetEvent('eonexis-phone:notify')
+AddEventHandler('eonexis-phone:notify', function(msg, t)
+    notify(msg, t)
+end)
+
+-- GPS waypoint setter from phone NUI
+RegisterNUICallback('setWaypoint', function(data, cb)
+    cb({})
+    closePhone()
+    local x, y = tonumber(data.x), tonumber(data.y)
+    -- Convert world coords to minimap UV (GTA map is 8192x8192 centred at 0,0)
+    local u = x / 8192.0 + 0.5
+    local v = y / 8192.0 * -1.0 + 0.5
+    SetNewWaypoint(u, v)
+    if exports['eonexis-notify'] then
+        exports['eonexis-notify']:Notify('GPS', 'Waypoint set!', 'success', 3000)
+    end
+end)
+
+-- Send GPS locations when phone opens
+AddEventHandler('eonexis-phone:open', function()
+    if phoneOpen then closePhone() else openPhone() end
+end)
+
+-- On open, send GPS blips from gps mod
+local function sendGPSLocs()
+    local ok, locs = pcall(function() return exports['eonexis-gps']:getGPSLocations() end)
+    if ok and locs then
+        SendNUIMessage({ action='setGPSLocs', locs=locs })
+    end
+end
+

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eonexis</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,800&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- Ambient glow orbs -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="container">
+    <!-- Logo / wordmark -->
+    <div class="logo-wrap">
+      <svg class="logo-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="20" cy="20" r="18" stroke="url(#grad)" stroke-width="2"/>
+        <path d="M12 20 L20 12 L28 20 L20 28 Z" fill="url(#grad)" opacity="0.9"/>
+        <circle cx="20" cy="20" r="4" fill="white" opacity="0.95"/>
+        <defs>
+          <linearGradient id="grad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#a78bfa"/>
+            <stop offset="100%" stop-color="#7c3aed"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <span class="logo-text">Eonexis</span>
+    </div>
+
+    <!-- Status message -->
+    <p class="status-msg" id="statusMsg">Connecting to server...</p>
+
+    <!-- Progress bar -->
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+      <div class="progress-glow" id="progressGlow"></div>
+    </div>
+
+    <!-- Progress percent -->
+    <p class="progress-pct" id="progressPct">0%</p>
+
+    <!-- Tips carousel -->
+    <div class="tips-wrap">
+      <p class="tips-label">TIP</p>
+      <p class="tips-text" id="tipText"></p>
+    </div>
+  </div>
+
+  <!-- Bottom bar -->
+  <div class="bottom-bar">
+    <span class="bottom-tag">GTA V Multiplayer</span>
+    <span class="bottom-tag powered">Powered by FiveM</span>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

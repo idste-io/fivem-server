@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,800&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- Bottom-left cluster: health, armor, speed -->
+  <div id="hud" class="hidden">
+    <div id="stats">
+      <div class="stat" id="hp-wrap">
+        <span class="stat-icon">♥</span>
+        <div class="bar-track"><div class="bar-fill" id="hp-bar"></div></div>
+        <span class="stat-val" id="hp-val">100</span>
+      </div>
+      <div class="stat" id="arm-wrap">
+        <span class="stat-icon">🛡</span>
+        <div class="bar-track"><div class="bar-fill armour" id="arm-bar"></div></div>
+        <span class="stat-val" id="arm-val">0</span>
+      </div>
+    </div>
+
+    <div id="speed-block" class="hidden">
+      <span id="speed-val">0</span>
+      <span id="speed-unit">MPH</span>
+    </div>
+
+    <!-- Top-right: street + time -->
+    <div id="info-block">
+      <span id="street-name"></span>
+      <span id="clock"></span>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

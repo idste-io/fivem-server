@@ -1,0 +1,67 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; background: transparent; font-family: 'Satoshi', 'Inter', sans-serif; pointer-events: none; user-select: none; }
+
+:root {
+  --bg:     rgba(10,10,18,0.75);
+  --border: rgba(255,255,255,0.08);
+  --fg:     hsl(240,10%,92%);
+  --muted:  hsl(240,8%,55%);
+  --hp:     hsl(152,80%,45%);
+  --arm:    hsl(195,90%,50%);
+  --violet: hsl(258,85%,65%);
+}
+
+.hidden { display: none !important; }
+
+/* ── Stats cluster (bottom-left) ──────────────────────────────────────────── */
+#hud { position: fixed; bottom: 2rem; left: 2rem; display: flex; flex-direction: column; gap: 0.5rem; }
+
+#stats { display: flex; flex-direction: column; gap: 0.35rem; }
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  padding: 0.3rem 0.55rem;
+  backdrop-filter: blur(8px);
+}
+.stat-icon { font-size: 0.7rem; width: 14px; text-align: center; }
+.bar-track { width: 90px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 9999px; overflow: hidden; }
+.bar-fill  { height: 100%; background: var(--hp); border-radius: 9999px; transition: width 0.4s ease; }
+.bar-fill.armour { background: var(--arm); }
+.stat-val  { font-size: 0.7rem; font-weight: 700; color: var(--fg); min-width: 22px; text-align: right; }
+
+/* ── Speedometer (bottom-left below stats) ────────────────────────────────── */
+#speed-block {
+  display: flex;
+  align-items: baseline;
+  gap: 0.2rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  padding: 0.35rem 0.6rem;
+  backdrop-filter: blur(8px);
+}
+#speed-val  { font-size: 1.6rem; font-weight: 800; color: var(--fg); line-height: 1; }
+#speed-unit { font-size: 0.6rem; font-weight: 600; color: var(--muted); letter-spacing: 0.1em; }
+
+/* ── Info block (top-right) ───────────────────────────────────────────────── */
+#info-block {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  padding: 0.35rem 0.7rem;
+  backdrop-filter: blur(8px);
+}
+#street-name { font-size: 0.72rem; font-weight: 600; color: var(--fg); }
+#clock       { font-size: 0.65rem; font-weight: 500; color: var(--violet); letter-spacing: 0.05em; }

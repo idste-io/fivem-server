@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,800&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div id="overlay" class="hidden">
+    <div id="panel">
+      <div id="header">
+        <div class="logo-row">
+          <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
+            <circle cx="20" cy="20" r="18" stroke="url(#g)" stroke-width="2"/>
+            <path d="M12 20 L20 12 L28 20 L20 28 Z" fill="url(#g)" opacity="0.9"/>
+            <circle cx="20" cy="20" r="4" fill="white" opacity="0.95"/>
+            <defs><linearGradient id="g" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#7c3aed"/>
+            </linearGradient></defs>
+          </svg>
+          <span class="title">Eonexis — Server Rules</span>
+        </div>
+        <button id="close-btn" onclick="close()">✕</button>
+      </div>
+      <div id="content">
+        <section>
+          <h2>§1 — Respect</h2>
+          <ul>
+            <li>Treat all players with respect. No harassment, hate speech, or discrimination.</li>
+            <li>No trolling, griefing, or intentional disruption of others' roleplay.</li>
+            <li>Keep disputes in character — resolve OOC issues in Discord.</li>
+          </ul>
+        </section>
+        <section>
+          <h2>§2 — Roleplay Standards</h2>
+          <ul>
+            <li>Stay in character at all times unless in an OOC zone or channel.</li>
+            <li>No random death match (RDM) — you must have valid RP reason to attack.</li>
+            <li>No vehicle death match (VDM) — do not use vehicles as weapons without RP reason.</li>
+            <li>Value your life (VLT) — act as a real person would when threatened.</li>
+            <li>No metagaming — don't use out-of-character information in-game.</li>
+            <li>No powergaming — don't force actions on others without consent.</li>
+          </ul>
+        </section>
+        <section>
+          <h2>§3 — New Life Rule (NLR)</h2>
+          <ul>
+            <li>After dying, you forget everything that happened in that situation.</li>
+            <li>You may not return to the scene of your death for 15 minutes.</li>
+          </ul>
+        </section>
+        <section>
+          <h2>§4 — Cops / EMS</h2>
+          <ul>
+            <li>Do not kill emergency services unless they are a direct threat to your life.</li>
+            <li>A minimum of 2 cops must be online to rob a bank or major business.</li>
+            <li>Hostages must be treated fairly — no torture or execution without RP escalation.</li>
+          </ul>
+        </section>
+        <section>
+          <h2>§5 — Cheating & Exploits</h2>
+          <ul>
+            <li>Zero tolerance for hacks, mods, or exploits. Permanent ban.</li>
+            <li>Report bugs immediately to staff — do not abuse them.</li>
+            <li>Do not duplicate money, items, or vehicles by any means.</li>
+          </ul>
+        </section>
+        <section>
+          <h2>§6 — Community</h2>
+          <ul>
+            <li>Join our Discord for updates, support, and community events.</li>
+            <li>Staff decisions are final. Argue in tickets, not in-game.</li>
+            <li>Have fun and make great stories — that's what we're here for.</li>
+          </ul>
+        </section>
+      </div>
+      <div id="footer">
+        <span>Press <kbd>F2</kbd> or type <kbd>/rules</kbd> to open this at any time</span>
+        <button class="btn-accept" onclick="close()">I Understand</button>
+      </div>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

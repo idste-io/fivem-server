@@ -1,8 +1,7 @@
 #!/bin/bash
-# FiveM server update script
-# Pulls latest from GitHub and restarts the server.
+# Eonexis FiveM update script
 # Usage: bash /opt/fivem-server/scripts/update.sh
-# Or remotely: ssh root@187.124.93.157 "bash /opt/fivem-server/scripts/update.sh"
+# Remote: ssh root@187.124.93.157 "bash /opt/fivem-server/scripts/update.sh"
 
 set -euo pipefail
 
@@ -13,14 +12,24 @@ mkdir -p /var/log/fivem
 LOG="/var/log/fivem/update-$(date +%Y%m%d-%H%M%S).log"
 exec > >(tee -a "$LOG") 2>&1
 
-echo "[fivem-update] $(date) — starting"
+echo "[eonexis-fivem] $(date) — starting update"
 
+# Pull latest from GitHub
 git -C "$REPO_DIR" pull --ff-only
-echo "[fivem-update] repo up to date"
+echo "[eonexis-fivem] repo synced"
 
-rsync -av --delete "$REPO_DIR/resources/" "$SERVER_DIR/resources/"
+# Sync server.cfg (does NOT touch license.cfg — key stays safe)
 cp "$REPO_DIR/server.cfg" "$SERVER_DIR/server.cfg"
-echo "[fivem-update] files synced"
 
+# Sync all resources (system + custom mods)
+rsync -av --delete \
+  --exclude='.gitkeep' \
+  "$REPO_DIR/resources/" "$SERVER_DIR/resources/"
+echo "[eonexis-fivem] resources synced"
+
+# Restart server
 systemctl restart fivem
-echo "[fivem-update] service restarted — $(systemctl is-active fivem)"
+sleep 2
+STATUS=$(systemctl is-active fivem || true)
+echo "[eonexis-fivem] fivem service: $STATUS"
+echo "[eonexis-fivem] done ✓"

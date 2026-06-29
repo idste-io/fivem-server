@@ -53,22 +53,31 @@ AddEventHandler('eonexis-economy:requestLocation', function()
     TriggerServerEvent('eonexis-economy:saveLocation', pos.x, pos.y, pos.z, h)
 end)
 
--- HUD: cash display bottom-left
+-- HUD: always-on money panel — bottom-left corner
 CreateThread(function()
     while true do
         Wait(0)
         if not Config.ShowHUD then goto continue end
-        -- Cash label
+
+        -- Background pill
+        DrawRect(0.065, 0.945, 0.125, 0.055, 10, 10, 20, 190)
+
+        -- Cash line
         SetTextFont(4)
-        SetTextScale(0.3, 0.3)
-        SetTextColour(255, 255, 255, 200)
+        SetTextScale(0.32, 0.32)
+        SetTextColour(80, 255, 120, 255)
         SetTextEntry('STRING')
-        AddTextComponentString(('$%s  |  Bank: $%s  |  %s'):format(
-            tostring(math.floor(cash)),
-            tostring(math.floor(bank)),
-            job
-        ))
-        DrawText(0.01, 0.95)
+        AddTextComponentString(string.format('💵  $%s', tostring(math.floor(cash)):reverse():gsub('(%d%d%d)', '%1,'):reverse():gsub('^,', '')))
+        DrawText(0.01, 0.925)
+
+        -- Bank line
+        SetTextFont(4)
+        SetTextScale(0.28, 0.28)
+        SetTextColour(100, 180, 255, 220)
+        SetTextEntry('STRING')
+        AddTextComponentString(string.format('🏦  $%s', tostring(math.floor(bank)):reverse():gsub('(%d%d%d)', '%1,'):reverse():gsub('^,', '')))
+        DrawText(0.01, 0.953)
+
         ::continue::
     end
 end)

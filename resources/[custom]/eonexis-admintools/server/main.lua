@@ -251,6 +251,38 @@ RegisterCommand('checkwallet', function(src, args)
     end
 end, true)
 
+-- Discord bot can call this to grant/revoke admin live (via HTTP event → lua event)
+RegisterNetEvent('eonexis-admintools:discordAdminAdd')
+AddEventHandler('eonexis-admintools:discordAdminAdd', function(license, playerName)
+    if not persistentAdmins[license] then
+        persistentAdmins[license] = playerName or 'Discord Admin'
+        saveAdmins()
+        -- Notify if the player is currently online
+        for _, pid in ipairs(GetPlayers()) do
+            local lic = getIdentifier(tonumber(pid))
+            if lic == license then
+                notify(tonumber(pid), '✅ Discord admin role granted — you now have in-game admin.', 'success')
+            end
+        end
+        print('[eonexis-admintools] Discord admin_add: ' .. license)
+    end
+end)
+
+RegisterNetEvent('eonexis-admintools:discordAdminRemove')
+AddEventHandler('eonexis-admintools:discordAdminRemove', function(license)
+    if persistentAdmins[license] then
+        persistentAdmins[license] = nil
+        saveAdmins()
+        for _, pid in ipairs(GetPlayers()) do
+            local lic = getIdentifier(tonumber(pid))
+            if lic == license then
+                notify(tonumber(pid), '⚠️ Discord admin role removed — in-game admin access revoked.', 'warning')
+            end
+        end
+        print('[eonexis-admintools] Discord admin_remove: ' .. license)
+    end
+end)
+
 TriggerEvent('chat:addSuggestion', '/claimadmin',   'Claim admin access with password', {{ name='password', help='Admin password' }})
 TriggerEvent('chat:addSuggestion', '/kick',         'Kick a player', {{ name='id/name', help='ID or name' }, { name='reason', help='Reason' }})
 TriggerEvent('chat:addSuggestion', '/ban',          'Ban a player',  {{ name='id/name', help='ID or name' }, { name='reason', help='Reason' }})

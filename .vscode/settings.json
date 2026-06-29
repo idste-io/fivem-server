@@ -1,0 +1,13 @@
+{
+  "remote.SSH.remotePlatform": {
+    "187.124.93.157": "linux"
+  },
+  "files.eol": "\n",
+  "files.associations": {
+    "*.cfg": "lua"
+  },
+  "[lua]": {
+    "editor.tabSize": 2
+  },
+  "editor.formatOnSave": false
+}

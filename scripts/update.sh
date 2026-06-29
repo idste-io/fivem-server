@@ -1,40 +1,26 @@
 #!/bin/bash
 # FiveM server update script
-# Usage: bash /opt/fivem/scripts/update.sh
-# Pulls latest config/resources from GitHub and restarts the server.
+# Pulls latest from GitHub and restarts the server.
+# Usage: bash /opt/fivem-server/scripts/update.sh
+# Or remotely: ssh root@187.124.93.157 "bash /opt/fivem-server/scripts/update.sh"
 
 set -euo pipefail
 
-REPO_DIR="/opt/fivem-config"
+REPO_DIR="/opt/fivem-server"
 SERVER_DIR="/opt/fivem"
-LOG_FILE="/var/log/fivem/update-$(date +%Y%m%d-%H%M%S).log"
 
 mkdir -p /var/log/fivem
+LOG="/var/log/fivem/update-$(date +%Y%m%d-%H%M%S).log"
+exec > >(tee -a "$LOG") 2>&1
 
-exec > >(tee -a "$LOG_FILE") 2>&1
+echo "[fivem-update] $(date) — starting"
 
-echo "[fivem-update] $(date) — starting update"
+git -C "$REPO_DIR" pull --ff-only
+echo "[fivem-update] repo up to date"
 
-# Pull latest config from GitHub
-if [ -d "$REPO_DIR/.git" ]; then
-  echo "[fivem-update] pulling latest from GitHub..."
-  git -C "$REPO_DIR" pull --ff-only
-else
-  echo "[fivem-update] cloning repo..."
-  git clone https://github.com/idste-io/fivem-server.git "$REPO_DIR"
-fi
-
-# Sync resources
-echo "[fivem-update] syncing resources..."
 rsync -av --delete "$REPO_DIR/resources/" "$SERVER_DIR/resources/"
-
-# Sync server.cfg
-echo "[fivem-update] syncing server.cfg..."
 cp "$REPO_DIR/server.cfg" "$SERVER_DIR/server.cfg"
+echo "[fivem-update] files synced"
 
-# Restart service
-echo "[fivem-update] restarting fivem.service..."
 systemctl restart fivem
-
-echo "[fivem-update] done. Server status:"
-systemctl is-active fivem || true
+echo "[fivem-update] service restarted — $(systemctl is-active fivem)"

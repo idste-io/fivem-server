@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Settings</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="overlay" class="hidden">
+  <div id="scaler">
+    <div class="panel">
+      <div class="header">
+        <div class="logo">⬡ EONEXIS RP</div>
+        <div id="panel-title" class="subtitle">Settings</div>
+      </div>
+
+      <!-- First-run welcome banner -->
+      <div id="firstrun-banner" class="firstrun hidden">
+        👋 Welcome! Pick your UI size below — you can change this anytime in Settings (F7).
+      </div>
+
+      <div class="tabs" id="tab-row">
+        <button class="tab active" data-tab="display">🖥 Display</button>
+        <button class="tab" data-tab="controls">🎮 Controls</button>
+        <button class="tab" data-tab="game">⚙ Game</button>
+        <button class="tab" data-tab="account">🔗 Account</button>
+      </div>
+
+      <div class="body">
+        <!-- DISPLAY -->
+        <div class="tab-pane active" data-pane="display">
+          <div class="section-label">UI Scale</div>
+          <p class="hint">Choose how large the on-screen menus and HUD appear.</p>
+          <div id="scale-list" class="scale-list"></div>
+          <div class="scale-preview">Preview: <span id="scale-preview-text">Aa</span></div>
+        </div>
+
+        <!-- CONTROLS -->
+        <div class="tab-pane" data-pane="controls">
+          <div class="section-label">Keybinds</div>
+          <p class="hint">Rebind any key in <b>GTA Settings ▸ Key Bindings ▸ FiveM</b>. Defaults below.</p>
+          <div id="keybind-list" class="keybind-list"></div>
+          <div class="section-label" style="margin-top:14px">Controller</div>
+          <p class="hint">When a controller is connected, use the <b>right stick</b> to move the cursor in any menu, <b>A</b> to select, <b>B</b> to go back. Toggle this in the Game tab.</p>
+        </div>
+
+        <!-- GAME -->
+        <div class="tab-pane" data-pane="game">
+          <div class="section-label">Game Options</div>
+          <div id="toggle-list" class="toggle-list"></div>
+        </div>
+
+        <!-- ACCOUNT -->
+        <div class="tab-pane" data-pane="account">
+          <div class="section-label">Link & Community</div>
+          <p class="hint">Link your Discord to your character and unlock rewards on the web app.</p>
+          <button class="link-btn discord" id="btn-link">🔗 Link Discord (Web App)</button>
+          <button class="link-btn" id="btn-webapp">🌐 Open Eonexis Web App</button>
+          <button class="link-btn discord-invite" id="btn-discord">💬 Join our Discord</button>
+        </div>
+      </div>
+
+      <div class="footer">
+        <button class="btn-cancel" id="btn-close">Close</button>
+        <button class="btn-save hidden" id="btn-finish">Save & Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Virtual controller cursor -->
+  <div id="ctrl-cursor" class="ctrl-cursor hidden"></div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

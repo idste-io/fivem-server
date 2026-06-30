@@ -252,5 +252,39 @@ window.addEventListener('message', function(e) {
         updateDutyUI();
     } else if (d.action === 'setWorkStatus') {
         document.getElementById('w-status').textContent = d.status || 'No active task';
+    } else if (d.action === 'controllerCursor') {
+        moveCtrlCursor(d.x, d.y);
+    } else if (d.action === 'controllerClick') {
+        clickCtrlAt(d.x, d.y);
+    } else if (d.action === 'controllerBack') {
+        // B button → go back to home, or close if already home
+        if (document.getElementById('home-screen').classList.contains('active')) {
+            post('close');
+            document.getElementById('phone').classList.add('hidden');
+        } else {
+            goHome();
+        }
     }
 });
+
+// ── Controller cursor support (driven by eonexis-settings) ───────────────────
+let _ctrlCursor = null;
+function ensureCtrlCursor() {
+    if (_ctrlCursor) return _ctrlCursor;
+    _ctrlCursor = document.createElement('div');
+    _ctrlCursor.style.cssText = 'position:fixed;width:18px;height:18px;border-radius:50%;'
+        + 'border:2px solid #9352DB;background:rgba(147,82,219,0.4);pointer-events:none;'
+        + 'transform:translate(-50%,-50%);z-index:99999;box-shadow:0 0 8px rgba(147,82,219,0.8);';
+    document.body.appendChild(_ctrlCursor);
+    return _ctrlCursor;
+}
+function moveCtrlCursor(x, y) {
+    const c = ensureCtrlCursor();
+    c.style.display = 'block';
+    c.style.left = (x * window.innerWidth) + 'px';
+    c.style.top  = (y * window.innerHeight) + 'px';
+}
+function clickCtrlAt(x, y) {
+    const el = document.elementFromPoint(x * window.innerWidth, y * window.innerHeight);
+    if (el) el.click();
+}

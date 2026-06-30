@@ -9,6 +9,8 @@ author 'Eonexis'
 loadscreen 'html/index.html'
 loadscreen_manual_shutdown 'yes'
 
+client_script 'client.lua'
+
 file 'html/index.html'
 file 'html/style.css'
 file 'html/script.js'

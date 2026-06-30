@@ -245,10 +245,15 @@ RegisterNUICallback('spawnParachute', function(data, cb)
 
     TriggerEvent('eonexis-phone:spawned')  -- anticheat grace
     local ped = PlayerPedId()
+    -- Equip parachute then teleport to sky position
+    SetEntityVelocity(ped, 0, 0, 0)
     GiveWeaponToPed(ped, GetHashKey('gadget_parachute'), 1, false, true)
+    SelectWeapon(ped, GetHashKey('gadget_parachute'))
     SetEntityCoords(ped, loc.x, loc.y, loc.airZ, false, false, false, true)
+    -- Extend grace to cover the fall time
+    SetTimeout(2000, function() TriggerEvent('eonexis-phone:spawned') end)
 
-    notify('Parachute activated! Pull chute with F!', 'info')
+    notify('Falling! Press SPACE or LMB to deploy parachute.', 'info')
 end)
 
 RegisterNUICallback('spawnBuilding', function(data, cb)

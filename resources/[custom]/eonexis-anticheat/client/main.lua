@@ -43,8 +43,10 @@ CreateThread(function()
         else
             local ped   = PlayerPedId()
             local pos   = GetEntityCoords(ped)
-            local spd   = GetEntitySpeed(ped)
-            local inVeh = GetVehiclePedIsIn(ped, false) ~= 0
+            local veh   = GetVehiclePedIsIn(ped, false)
+            local inVeh = veh ~= 0 or IsPedInAnyVehicle(ped, false)
+            -- Use vehicle speed when in vehicle (more reliable than ped speed)
+            local spd   = inVeh and veh ~= 0 and GetEntitySpeed(veh) or GetEntitySpeed(ped)
 
             if lastPos then
                 local dist = #(pos - lastPos)

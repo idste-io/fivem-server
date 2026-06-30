@@ -18,6 +18,7 @@ AddEventHandler('eonexis-admintools:tpTo', function(targetSrc)
     local targetPed = GetPlayerPed(GetPlayerFromServerId(targetSrc))
     if DoesEntityExist(targetPed) then
         local coords = GetEntityCoords(targetPed)
+        TriggerEvent('eonexis-admintools:teleported')
         SetEntityCoords(PlayerPedId(), coords.x, coords.y, coords.z, false, false, false, true)
     end
 end)
@@ -28,6 +29,7 @@ AddEventHandler('eonexis-admintools:bringMe', function(adminSrc)
     local adminPed = GetPlayerPed(GetPlayerFromServerId(adminSrc))
     if DoesEntityExist(adminPed) then
         local coords = GetEntityCoords(adminPed)
+        TriggerEvent('eonexis-admintools:teleported')
         SetEntityCoords(PlayerPedId(), coords.x, coords.y, coords.z + 1.0, false, false, false, true)
     end
 end)
@@ -68,36 +70,69 @@ RegisterNetEvent('eonexis-admintools:toggleNoclip')
 AddEventHandler('eonexis-admintools:toggleNoclip', function()
     noclip = not noclip
     local ped = PlayerPedId()
-    SetEntityCollision(ped, not noclip, true)
     if noclip then
-        SetEntityAlpha(ped, 180, false)
+        TriggerEvent('eonexis-admintools:teleported')  -- initial grace on enable
     else
+        -- Restore full entity state when noclip disabled
+        SetEntityCollision(ped, true, true)
         ResetEntityAlpha(ped)
+        SetEntityVelocity(ped, 0, 0, 0)
+        TriggerEvent('eonexis-admintools:teleported')  -- grace for the landing
     end
     if exports['eonexis-notify'] then
-        exports['eonexis-notify']:Notify('Admin', noclip and 'Noclip ON' or 'Noclip OFF', 'info', 2000)
+        exports['eonexis-notify']:Notify('Admin', noclip and 'Noclip ON — WASD + Q/E + Shift/Ctrl' or 'Noclip OFF', 'info', 2000)
     end
 end)
+
+local noclipGraceTimer = 0
 
 CreateThread(function()
     while true do
         Wait(0)
         if noclip then
             local ped = PlayerPedId()
+
+            -- Renew anticheat grace every 4s while noclip is on
+            if GetGameTimer() - noclipGraceTimer > 4000 then
+                noclipGraceTimer = GetGameTimer()
+                TriggerEvent('eonexis-admintools:teleported')
+            end
+
+            -- Exit vehicle if in one
+            if IsPedInAnyVehicle(ped, false) then
+                TaskLeaveAnyVehicle(ped, 0, 16)
+                Wait(500)
+            end
+
             local speed = 0.5
-            if IsControlPressed(0, 21) then speed = 2.0 end  -- shift = fast
-            local fwd   = GetEntityForwardVector(ped)
+            if IsControlPressed(0, 21) then speed = 2.5 end  -- shift = fast
+            if IsControlPressed(0, 36)  then speed = 8.0 end  -- ctrl = very fast
+
+            local camFwd = GetGameplayCamForwardVector()
             local dx, dy, dz = 0.0, 0.0, 0.0
-            if IsControlPressed(0, 32) then dx = fwd.x * speed; dy = fwd.y * speed end
-            if IsControlPressed(0, 33) then dx = -fwd.x * speed; dy = -fwd.y * speed end
-            if IsControlPressed(0, 34) then dx = -fwd.y * speed; dy = fwd.x * speed end
-            if IsControlPressed(0, 35) then dx = fwd.y * speed; dy = -fwd.x * speed end
-            if IsControlPressed(0, 44) then dz = speed end   -- Q up
-            if IsControlPressed(0, 38) then dz = -speed end  -- E down
+
+            if IsControlPressed(0, 32) then  -- W — forward along camera direction
+                dx = camFwd.x * speed; dy = camFwd.y * speed; dz = camFwd.z * speed
+            end
+            if IsControlPressed(0, 33) then  -- S — backward
+                dx = -camFwd.x * speed; dy = -camFwd.y * speed; dz = -camFwd.z * speed
+            end
+            -- Strafe
+            local right = vector3(-camFwd.y, camFwd.x, 0.0)
+            if IsControlPressed(0, 34) then dx = dx + right.x * speed; dy = dy + right.y * speed end
+            if IsControlPressed(0, 35) then dx = dx - right.x * speed; dy = dy - right.y * speed end
+            -- Vertical
+            if IsControlPressed(0, 44) then dz = dz + speed end  -- Q
+            if IsControlPressed(0, 38) then dz = dz - speed end  -- E
+
             local pos = GetEntityCoords(ped)
+            SetEntityCollision(ped, false, true)
             SetEntityVelocity(ped, 0, 0, 0)
             SetEntityCoords(ped, pos.x + dx, pos.y + dy, pos.z + dz, false, false, false, false)
-            ClearPedTasks(ped)
+            SetEntityAlpha(ped, 180, false)
+            FreezeEntityPosition(ped, false)
+        else
+            noclipGraceTimer = 0
         end
     end
 end)

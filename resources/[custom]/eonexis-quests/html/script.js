@@ -104,6 +104,11 @@ function GetParentResourceName() {
   return 'eonexis-quests';
 }
 
+// Close on Q or Escape — NUI captures keyboard when focused so the game command can't fire
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'q' || e.key === 'Q' || e.key === 'Escape') close();
+});
+
 // UI scale from eonexis-settings
 window.addEventListener('message', function(e) {
     if (e.data && e.data.action === 'setScale') {

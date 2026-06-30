@@ -40,6 +40,13 @@ local function getLicenseDefs()
     return {}
 end
 
+local function sendCharData()
+    local ok, char = pcall(function() return exports['eonexis-character']:getMyCharacter() end)
+    if ok and char then
+        SendNUIMessage({ action='setCharData', char=char })
+    end
+end
+
 local function openPhone()
     if phoneOpen then return end
     phoneOpen = true
@@ -57,6 +64,7 @@ local function openPhone()
     })
     sendSpawnLocs()
     sendGPSLocs()
+    sendCharData()
 end
 
 local function closePhone()
@@ -282,22 +290,7 @@ AddEventHandler('eonexis-phone:open', function()
     if phoneOpen then closePhone() else openPhone() end
 end)
 
--- On open, send GPS blips from gps mod
-local function sendGPSLocs2()
-    local ok, locs = pcall(function() return exports['eonexis-gps']:getGPSLocations() end)
-    if ok and locs then
-        SendNUIMessage({ action='setGPSLocs', locs=locs })
-    end
-end
-
 -- ── Character App ─────────────────────────────────────────────────────────────
-
-local function sendCharData()
-    local ok, char = pcall(function() return exports['eonexis-character']:getMyCharacter() end)
-    if ok and char then
-        SendNUIMessage({ action='setCharData', char=char })
-    end
-end
 
 RegisterNUICallback('openCharacterCreator', function(_, cb)
     cb({})
@@ -364,15 +357,10 @@ AddEventHandler('eonexis-ui:scaleChanged', function(v)
     SendNUIMessage({ action = 'setScale', scale = v })
 end)
 
--- Send character + stats data when phone opens
-local _origOpenPhone = openPhone
-function openPhone()
-    if phoneOpen then return end
-    phoneOpen = true
-    SetNuiFocus(true, true)
-    SendNUIMessage({ action='open', cash=cash, bank=bank, job=job })
-    sendSpawnLocs()
-    sendGPSLocs()
-    sendCharData()
-end
+RegisterCommand('resetui', function()
+    if phoneOpen then
+        print('[eonexis-phone] /resetui: force-closing phone')
+        closePhone()
+    end
+end, false)
 

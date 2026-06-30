@@ -129,6 +129,10 @@ window.addEventListener('message', e => {
 
 $('char-name').addEventListener('input', updateCostInfo);
 
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') cancel();
+});
+
 // UI scale from eonexis-settings
 window.addEventListener('message', function(e) {
     if (e.data && e.data.action === 'setScale') {

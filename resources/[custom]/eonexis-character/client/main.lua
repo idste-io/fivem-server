@@ -117,6 +117,15 @@ RegisterCommand('mycharacter', function()
     if nuiOpen then closeNUI() return end
     openNUI(myChar, Config.Outfits)
 end, false)
+
+RegisterCommand('resetui', function()
+    if nuiOpen then
+        print('[eonexis-character] /resetui: force-closing character menu')
+        isFirstTime = false
+        closeNUI()
+    end
+end, false)
+
 TriggerEvent('chat:addSuggestion', '/mycharacter', 'View or edit your character')
 
 -- ── Export for phone app ──────────────────────────────────────────────────────

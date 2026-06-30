@@ -135,7 +135,15 @@ RegisterCommand('skilltree', function()
     if treeOpen then closeTree() else openTree() end
 end, false)
 
+RegisterCommand('resetui', function()
+    if treeOpen then
+        print('[eonexis-skilltree] /resetui: force-closing skill tree')
+        closeTree()
+    end
+end, false)
+
 TriggerEvent('chat:addSuggestion', '/skilltree', 'Open the Eonexis Skill Tree')
+TriggerEvent('chat:addSuggestion', '/resetui', 'Emergency: close all menus if you are stuck')
 
 -- ── Trigger completions from world events ─────────────────────────────────────
 

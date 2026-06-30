@@ -37,13 +37,18 @@ CreateThread(function()
     end
 end)
 
--- Sync new joiners after 3s
-AddEventHandler('playerConnecting', function()
+-- Sync new joiners. Use playerJoining (final, valid server id) — NOT
+-- playerConnecting, whose temporary source id is invalid for TriggerClientEvent
+-- and throws "Argument at index 0 was null". The client also calls requestSync
+-- on spawn as a backstop.
+AddEventHandler('playerJoining', function()
     local src = source
     CreateThread(function()
         Wait(3000)
-        TriggerClientEvent('eonexis-weather:setWeather', src, currentWeather(), 0)
-        TriggerClientEvent('eonexis-weather:setTime',    src, svrHour, svrMin)
+        if GetPlayerName(src) then
+            TriggerClientEvent('eonexis-weather:setWeather', src, currentWeather(), 0)
+            TriggerClientEvent('eonexis-weather:setTime',    src, svrHour, svrMin)
+        end
     end)
 end)
 

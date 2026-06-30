@@ -43,11 +43,11 @@ AddEventHandler('playerDropped', function(reason)
     })
 end)
 
--- 12-hour status is now handled by the bot's cron (tasks.js).
--- We only send first-start ping so the bot can refresh its info dashboard.
+-- Bot handles status refresh via its own cron (tasks.js).
+-- Send a server_restart ping so the bot can post a status update.
 CreateThread(function()
     Wait(30000)  -- 30s after resource start
-    postEvent({ type = 'servermon', errors = {} })  -- triggers bot to refresh
+    postEvent({ type = 'server_restart' })
 end)
 
 print('[eonexis-discord-notify] loaded — posting to bot HTTP on port 3001')

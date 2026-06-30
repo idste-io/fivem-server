@@ -1,8 +1,9 @@
 -- eonexis-discord-link — server
 -- HTTP API for Discord bot + /link command + join/leave events
 
-local pendingCodes = {}   -- code → { license, name, expiry }
+local pendingCodes  = {}  -- code → { license, name, expiry }
 local linkedPlayers = {}  -- license → discordId (in-memory, loaded from bot)
+local activeCodes   = {}  -- license → code (one active code per player)
 
 -- ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -18,7 +19,8 @@ local function generateCode()
     local chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
     local code  = ''
     for _ = 1, 6 do
-        code = code .. chars:sub(math.random(1, #chars), math.random(1, #chars))
+        local i = math.random(1, #chars)
+        code = code .. chars:sub(i, i)
     end
     return code
 end
@@ -164,9 +166,6 @@ SetHttpHandler(function(req, res)
         sendJson(res, 404, { error = 'Not found' })
     end
 end)
-
--- per-license active code so /link always returns the SAME code until it's used or expires
-local activeCodes = {}  -- license → code
 
 -- ── /link command ─────────────────────────────────────────────────────────────
 

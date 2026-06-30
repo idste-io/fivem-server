@@ -34,9 +34,11 @@ RegisterNetEvent('eonexis-character:receive')
 AddEventHandler('eonexis-character:receive', function(char)
     myChar = char
     if not char then
-        -- First time — show creator
         isFirstTime = true
         openNUI(nil, Config.Outfits)
+    else
+        -- Re-apply outfit on every load (join and respawn)
+        TriggerEvent('eonexis-character:applyOutfit', char.outfit, char.gender)
     end
 end)
 

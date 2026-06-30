@@ -4,9 +4,15 @@ local cash = 0
 local bank = 0
 local job  = 'unemployed'
 
--- Request data after spawn
+-- Request data on first load
 AddEventHandler('onClientGameTypeStart', function()
     Wait(2000)
+    TriggerServerEvent('eonexis-economy:requestData')
+end)
+
+-- Re-sync cash/bank/job on every spawn and respawn
+AddEventHandler('eonexis-spawn:done', function()
+    Wait(500)
     TriggerServerEvent('eonexis-economy:requestData')
 end)
 
@@ -53,30 +59,34 @@ AddEventHandler('eonexis-economy:requestLocation', function()
     TriggerServerEvent('eonexis-economy:saveLocation', pos.x, pos.y, pos.z, h)
 end)
 
--- HUD: always-on money panel — bottom-left corner
+-- HUD: always-on money panel — top-left (clear of minimap and right-side HUD)
+local function fmtMoney(n)
+    return tostring(math.floor(n)):reverse():gsub('(%d%d%d)', '%1,'):reverse():gsub('^,', '')
+end
+
 CreateThread(function()
     while true do
         Wait(0)
         if not Config.ShowHUD then goto continue end
 
         -- Background pill
-        DrawRect(0.065, 0.945, 0.125, 0.055, 10, 10, 20, 190)
+        DrawRect(0.068, 0.042, 0.13, 0.052, 10, 10, 20, 190)
 
         -- Cash line
         SetTextFont(4)
-        SetTextScale(0.32, 0.32)
+        SetTextScale(0.30, 0.30)
         SetTextColour(80, 255, 120, 255)
         SetTextEntry('STRING')
-        AddTextComponentString(string.format('💵  $%s', tostring(math.floor(cash)):reverse():gsub('(%d%d%d)', '%1,'):reverse():gsub('^,', '')))
-        DrawText(0.01, 0.925)
+        AddTextComponentString('💵  $' .. fmtMoney(cash))
+        DrawText(0.01, 0.018)
 
         -- Bank line
         SetTextFont(4)
-        SetTextScale(0.28, 0.28)
+        SetTextScale(0.26, 0.26)
         SetTextColour(100, 180, 255, 220)
         SetTextEntry('STRING')
-        AddTextComponentString(string.format('🏦  $%s', tostring(math.floor(bank)):reverse():gsub('(%d%d%d)', '%1,'):reverse():gsub('^,', '')))
-        DrawText(0.01, 0.953)
+        AddTextComponentString('🏦  $' .. fmtMoney(bank))
+        DrawText(0.01, 0.044)
 
         ::continue::
     end

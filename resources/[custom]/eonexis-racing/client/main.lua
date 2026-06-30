@@ -229,3 +229,7 @@ RegisterNUICallback('close', function(_, cb)
 end)
 
 TriggerEvent('chat:addSuggestion', '/leaderboard', 'View race leaderboard')
+
+AddEventHandler('eonexis-ui:scaleChanged', function(v)
+    SendNUIMessage({ action = 'setScale', scale = v })
+end)

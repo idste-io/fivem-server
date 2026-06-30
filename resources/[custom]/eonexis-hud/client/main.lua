@@ -69,3 +69,7 @@ CreateThread(function()
         ::continue::
     end
 end)
+
+AddEventHandler('eonexis-ui:scaleChanged', function(v)
+    SendNUIMessage({ action = 'setScale', scale = v })
+end)

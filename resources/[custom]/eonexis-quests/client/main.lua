@@ -212,3 +212,7 @@ CreateThread(function()
         notify('Press Q to open your Quest Log and start earning!', 'info')
     end
 end)
+
+AddEventHandler('eonexis-ui:scaleChanged', function(v)
+    SendNUIMessage({ action = 'setScale', scale = v })
+end)

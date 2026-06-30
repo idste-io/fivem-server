@@ -152,3 +152,7 @@ end)
 
 -- Event hook for controller shortcut
 AddEventHandler('eonexis-vehicles:openGarage', function() openGarage() end)
+
+AddEventHandler('eonexis-ui:scaleChanged', function(v)
+    SendNUIMessage({ action = 'setScale', scale = v })
+end)

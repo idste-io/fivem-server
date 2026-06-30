@@ -3,12 +3,13 @@
 local chosen = false
 
 local function doSpawnAt(sp, label)
+    TriggerEvent('eonexis-spawn:spawned')  -- anticheat grace before teleport
     exports.spawnmanager:spawnPlayer({
         x = sp.x, y = sp.y, z = sp.z,
         heading = sp.h or 0.0,
         model = 'mp_m_freemode_01',
     }, function()
-        TriggerEvent('sessionmanager:playerLoaded')
+        TriggerEvent('eonexis-spawn:spawned')  -- also after, in case spawn takes a moment
         SetNuiFocus(false, false)
         SendNUIMessage({ action = 'hide' })
         if exports['eonexis-notify'] then
@@ -71,4 +72,8 @@ AddEventHandler('onClientGameTypeStart', function()
             doSpawnAt(sp, sp.label)
         end
     end)
+end)
+
+AddEventHandler('eonexis-ui:scaleChanged', function(v)
+    SendNUIMessage({ action = 'setScale', scale = v })
 end)

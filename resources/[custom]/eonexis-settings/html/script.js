@@ -3,8 +3,8 @@
 const RES = 'eonexis-settings';
 let state = {
     firstRun: false,
-    scale: 'normal',
-    presets: [],
+    scale: 1.0,
+    keybinds: [],
     toggles: [],
     toggleState: {},
     links: {},
@@ -19,33 +19,33 @@ function post(cb, body) {
     }).catch(() => {});
 }
 
-// ── Scale ───────────────────────────────────────────────────────────────────
+// ── Scale slider ─────────────────────────────────────────────────────────────
 
-function applyScaleValue(v) {
-    $('scaler').style.transform = `scale(${v})`;
+function updateScaleUI(v) {
+    const slider = $('scale-slider');
+    if (slider) slider.value = v;
+    const pctEl = $('scale-pct');
+    if (pctEl) pctEl.textContent = Math.round(v * 100) + '%';
+    const prev = $('scale-preview-text');
+    if (prev) prev.style.fontSize = Math.round(16 * v) + 'px';
 }
 
-function renderScales() {
-    const list = $('scale-list');
-    list.innerHTML = '';
-    state.presets.forEach(p => {
-        const div = document.createElement('div');
-        div.className = 'scale-item' + (p.id === state.scale ? ' selected' : '');
-        div.innerHTML = `<div class="scale-name">${p.label}</div><div class="scale-val">${Math.round(p.value * 100)}%</div>`;
-        div.onclick = () => selectScale(p.id, p.value);
-        list.appendChild(div);
+function initSlider() {
+    const slider = $('scale-slider');
+    if (!slider) return;
+    slider.addEventListener('input', () => {
+        const v = parseFloat(slider.value);
+        updateScaleUI(v);
+        post('setScale', { value: v });
+    });
+    $('scale-reset').addEventListener('click', () => {
+        slider.value = 1.0;
+        updateScaleUI(1.0);
+        post('setScale', { value: 1.0 });
     });
 }
 
-function selectScale(id, value) {
-    state.scale = id;
-    renderScales();
-    applyScaleValue(value);
-    $('scale-preview-text').style.fontSize = (15 * value) + 'px';
-    post('setScale', { scale: id });
-}
-
-// ── Toggles ─────────────────────────────────────────────────────────────────
+// ── Toggles ──────────────────────────────────────────────────────────────────
 
 function renderToggles() {
     const list = $('toggle-list');
@@ -67,7 +67,7 @@ function renderToggles() {
     });
 }
 
-// ── Keybinds ──────────────────────────────────────────────────────────────────
+// ── Keybinds ─────────────────────────────────────────────────────────────────
 
 function renderKeybinds() {
     const list = $('keybind-list');
@@ -80,7 +80,7 @@ function renderKeybinds() {
     });
 }
 
-// ── Tabs ──────────────────────────────────────────────────────────────────────
+// ── Tabs ─────────────────────────────────────────────────────────────────────
 
 function initTabs() {
     document.querySelectorAll('.tab').forEach(tab => {
@@ -93,7 +93,7 @@ function initTabs() {
     });
 }
 
-// ── Account links ───────────────────────────────────────────────────────────────
+// ── Account links ─────────────────────────────────────────────────────────────
 
 function initLinks() {
     $('btn-link').onclick    = () => post('openLink', { url: state.links.linkUrl });
@@ -101,14 +101,13 @@ function initLinks() {
     $('btn-discord').onclick = () => post('openLink', { url: state.links.discord });
 }
 
-// ── Open / close ────────────────────────────────────────────────────────────────
+// ── Open / close ──────────────────────────────────────────────────────────────
 
 function openPanel(d) {
     state.firstRun    = d.firstRun;
-    state.scale       = d.scale || 'normal';
-    state.presets     = d.presets || [];
-    state.keybinds    = d.keybinds || [];
-    state.toggles     = d.toggles || [];
+    state.scale       = typeof d.scale === 'number' ? d.scale : 1.0;
+    state.keybinds    = d.keybinds    || [];
+    state.toggles     = d.toggles     || [];
     state.toggleState = d.toggleState || {};
     state.links       = { webapp: d.webapp, discord: d.discord, linkUrl: d.linkUrl };
 
@@ -117,8 +116,7 @@ function openPanel(d) {
     $('btn-finish').classList.toggle('hidden', !d.firstRun);
     $('btn-close').classList.toggle('hidden', d.firstRun);
 
-    applyScaleValue(d.scaleValue || 1.0);
-    renderScales();
+    updateScaleUI(state.scale);
     renderToggles();
     renderKeybinds();
 
@@ -130,7 +128,7 @@ function closePanel() {
     $('ctrl-cursor').classList.add('hidden');
 }
 
-// ── Controller cursor ───────────────────────────────────────────────────────────
+// ── Controller cursor ─────────────────────────────────────────────────────────
 
 function moveCursor(x, y) {
     const cur = $('ctrl-cursor');
@@ -144,32 +142,28 @@ function clickAt(x, y) {
     if (el) el.click();
 }
 
-// ── Message handler ─────────────────────────────────────────────────────────────
+// ── Message handler ───────────────────────────────────────────────────────────
 
 window.addEventListener('message', e => {
     const d = e.data;
     if (!d) return;
-    if (d.action === 'open')  openPanel(d);
-    if (d.action === 'close') closePanel();
+    if (d.action === 'open')  { openPanel(d); return; }
+    if (d.action === 'close') { closePanel(); return; }
     if (d.action === 'setScale') {
-        // external scale apply (when not in panel) — only affects our root if open
-        if (!$('overlay').classList.contains('hidden')) applyScaleValue(d.scale);
+        // Settings panel body itself doesn't scale — it IS the control panel
+        // But update the slider + preview to reflect the new value
+        if (typeof d.scale === 'number') updateScaleUI(d.scale);
+        return;
     }
-    if (d.action === 'controllerClick') clickAt(d.x, d.y);
+    if (d.action === 'controllerClick') { clickAt(d.x, d.y); return; }
     if (d.action === 'controllerBack') {
-        if (state.firstRun) return; // can't back out of first run
-        post('close');
-        closePanel();
+        if (state.firstRun) return;
+        post('close'); closePanel(); return;
     }
-    if (d.action === 'controllerCursor') moveCursor(d.x, d.y);
+    if (d.action === 'controllerCursor') { moveCursor(d.x, d.y); return; }
 });
 
-// also reflect cursor position pushed via setCursor messages
-window.addEventListener('message', e => {
-    if (e.data && e.data.action === 'cursorPos') moveCursor(e.data.x, e.data.y);
-});
-
-// ── Buttons ─────────────────────────────────────────────────────────────────────
+// ── Buttons ───────────────────────────────────────────────────────────────────
 
 $('btn-close').onclick  = () => { post('close'); closePanel(); };
 $('btn-finish').onclick = () => { post('finishFirstRun'); closePanel(); };
@@ -180,3 +174,4 @@ document.addEventListener('keydown', e => {
 
 initTabs();
 initLinks();
+initSlider();

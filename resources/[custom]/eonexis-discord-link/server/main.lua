@@ -83,7 +83,8 @@ SetHttpHandler(function(req, res)
             local pending = pendingCodes[data.code]
             if pending then
                 linkedPlayers[pending.license] = data.discordId
-                pendingCodes[data.code] = nil
+                pendingCodes[data.code]         = nil
+                activeCodes[pending.license]    = nil  -- code consumed
                 -- Notify in-game player
                 for _, src in ipairs(GetPlayers()) do
                     local lic = getIdentifier(tonumber(src))
@@ -164,56 +165,63 @@ SetHttpHandler(function(req, res)
     end
 end)
 
+-- per-license active code so /link always returns the SAME code until it's used or expires
+local activeCodes = {}  -- license → code
+
 -- ── /link command ─────────────────────────────────────────────────────────────
 
 RegisterCommand('link', function(src)
-    if src == 0 then return end  -- ignore server console
+    if src == 0 then return end
     local license = getIdentifier(src)
     if not license then
         TriggerClientEvent('eonexis-discord-link:msg', src, 'Could not read your identifier.', 'error')
         return
     end
-    -- Clean expired codes
     local now = os.time()
+    -- Expire stale codes
     for code, pending in pairs(pendingCodes) do
-        if now > pending.expiry then pendingCodes[code] = nil end
+        if now > pending.expiry then
+            if activeCodes[pending.license] == code then activeCodes[pending.license] = nil end
+            pendingCodes[code] = nil
+        end
     end
-    -- Generate new code
+    -- Reuse existing code for this player if still valid
+    local existingCode = activeCodes[license]
+    if existingCode and pendingCodes[existingCode] then
+        TriggerClientEvent('eonexis-discord-link:showCode', src, existingCode, pendingCodes[existingCode].expiry - now)
+        print(('[discord-link] %s reused link code %s'):format(GetPlayerName(src), existingCode))
+        return
+    end
+    -- Generate fresh code
     local code = generateCode()
-    pendingCodes[code] = { license = license, name = GetPlayerName(src), expiry = now + Config.CodeExpiry }
+    while pendingCodes[code] do code = generateCode() end  -- ensure unique
+    pendingCodes[code]  = { license = license, name = GetPlayerName(src), expiry = now + Config.CodeExpiry }
+    activeCodes[license] = code
     TriggerClientEvent('eonexis-discord-link:showCode', src, code, Config.CodeExpiry)
     print(('[discord-link] %s generated link code %s'):format(GetPlayerName(src), code))
 end, false)
 
-TriggerEvent('chat:addSuggestion', '/link', 'Get a code to link your Discord account')
+RegisterCommand('refreshcode', function(src)
+    if src == 0 then return end
+    local license = getIdentifier(src)
+    if not license then return end
+    -- Force-remove current code so /link generates a fresh one
+    local old = activeCodes[license]
+    if old then pendingCodes[old] = nil; activeCodes[license] = nil end
+    TriggerEvent('command:link', src)
+end, false)
 
--- ── Join / leave events ───────────────────────────────────────────────────────
+TriggerEvent('chat:addSuggestion', '/link', 'Get your persistent Discord link code')
+TriggerEvent('chat:addSuggestion', '/refreshcode', 'Generate a new Discord link code')
 
-AddEventHandler('playerConnecting', function(name, _, deferrals)
-    local src = source
-    deferrals.defer()
-    Wait(0)
-    deferrals.done()
-    -- Notify bot after connection deferred (actual notification on playerSpawned instead)
+-- Clear activeCodes entry when a code is successfully used
+local _origLinked = pendingCodes
+AddEventHandler('eonexis-discord-link:codeUsed', function(license)
+    activeCodes[license] = nil
 end)
 
--- Use playerJoining or a slight delay after connect
-local playerCount = 0
-AddEventHandler('playerConnecting', function(name)
-    CreateThread(function()
-        Wait(3000)
-        local src = source
-        if not GetPlayerName(src) then return end
-        local count = #GetPlayers()
-        notifyBot({ type='join', name=name, playerCount=count, maxPlayers=64 })
-    end)
-end)
-
-AddEventHandler('playerDropped', function(reason)
-    local src  = source
-    local name = GetPlayerName(src) or 'Unknown'
-    local count = math.max(0, #GetPlayers() - 1)
-    notifyBot({ type='leave', name=name, playerCount=count, maxPlayers=64 })
+AddEventHandler('playerDropped', function()
+    -- don't clear activeCodes on drop — code persists across reconnects until used/expired
 end)
 
 -- Export: check if player is linked

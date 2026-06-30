@@ -152,3 +152,11 @@ document.addEventListener('keydown', e => {
 
     document.addEventListener('mouseup', () => { dragging = false; });
 })();
+
+// UI scale from eonexis-settings
+window.addEventListener('message', function(e) {
+    if (e.data && e.data.action === 'setScale') {
+        document.body.style.transform = 'scale(' + e.data.scale + ')';
+        document.body.style.transformOrigin = 'center center';
+    }
+});

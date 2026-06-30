@@ -165,3 +165,7 @@ CreateThread(function()
         notify('New to Eonexis? Press F5 to open your Skill Tree and start your journey!', 'info')
     end
 end)
+
+AddEventHandler('eonexis-ui:scaleChanged', function(v)
+    SendNUIMessage({ action = 'setScale', scale = v })
+end)

@@ -130,3 +130,7 @@ exports('openCharacterCreator', function()
         openNUI(myChar, Config.Outfits)
     end
 end)
+
+AddEventHandler('eonexis-ui:scaleChanged', function(v)
+    SendNUIMessage({ action = 'setScale', scale = v })
+end)

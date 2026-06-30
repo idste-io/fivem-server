@@ -48,6 +48,17 @@ AddEventHandler('eonexis-anticheat:report', function(data)
     end
 end)
 
+-- Grant grace on join so initial spawn teleport doesn't flag
+AddEventHandler('playerJoining', function()
+    local src = source
+    CreateThread(function()
+        Wait(500)
+        if GetPlayerName(src) then
+            TriggerClientEvent('eonexis-anticheat:grantGrace', src, 15000)
+        end
+    end)
+end)
+
 AddEventHandler('playerDropped', function(reason)
     local src  = source
     local name = GetPlayerName(src) or '?'

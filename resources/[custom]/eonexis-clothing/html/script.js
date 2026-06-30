@@ -79,3 +79,11 @@ function save() {
 function close_() {
     fetch(`https://eonexis-clothing/close`, { method: 'POST', body: JSON.stringify({}) });
 }
+
+// UI scale from eonexis-settings
+window.addEventListener('message', function(e) {
+    if (e.data && e.data.action === 'setScale') {
+        document.body.style.transform = 'scale(' + e.data.scale + ')';
+        document.body.style.transformOrigin = 'center center';
+    }
+});

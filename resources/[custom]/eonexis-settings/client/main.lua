@@ -1,34 +1,33 @@
 -- eonexis-settings — client
--- Player settings: UI scale (first-run chooser + editable), keybinds, controller
--- cursor support for NUIs, Discord link button, game toggles. Persisted via KVP.
+-- UI scale (slider 0.5–2.0), toggles, keybinds, Discord link, first-run flow
 
 local KVP_PREFIX = 'eonexis_set_'
 local nuiOpen    = false
 local settings   = {
-    scale   = Config.DefaultScale,
+    scale   = 1.0,
     toggles = {},
 }
 
--- ── Persistence (client-side KVP) ──────────────────────────────────────────────
+-- ── Persistence ─────────────────────────────────────────────────────────────────
 
 local function loadSettings()
-    local rawScale = GetResourceKvpString(KVP_PREFIX .. 'scale')
-    if rawScale and rawScale ~= '' then settings.scale = rawScale end
+    local rawScale = GetResourceKvpString(KVP_PREFIX .. 'scaleV')
+    if rawScale and rawScale ~= '' then
+        settings.scale = tonumber(rawScale) or 1.0
+    end
     for _, t in ipairs(Config.Toggles) do
-        local v = GetResourceKvpInt(KVP_PREFIX .. 'toggle_' .. t.id)
-        -- KVP returns 0 if unset; distinguish via a "set" marker
         local marker = GetResourceKvpString(KVP_PREFIX .. 'tset_' .. t.id)
         if marker == '1' then
-            settings.toggles[t.id] = (v == 1)
+            settings.toggles[t.id] = (GetResourceKvpInt(KVP_PREFIX .. 'toggle_' .. t.id) == 1)
         else
             settings.toggles[t.id] = t.default
         end
     end
 end
 
-local function saveScale(scaleId)
-    settings.scale = scaleId
-    SetResourceKvp(KVP_PREFIX .. 'scale', scaleId)
+local function saveScale(v)
+    settings.scale = v
+    SetResourceKvp(KVP_PREFIX .. 'scaleV', tostring(v))
 end
 
 local function saveToggle(id, val)
@@ -45,23 +44,15 @@ local function markConfigured()
     SetResourceKvp(KVP_PREFIX .. 'configured', '1')
 end
 
--- ── Scale helpers ───────────────────────────────────────────────────────────────
+-- ── Scale broadcast ──────────────────────────────────────────────────────────────
 
-local function scaleValue(id)
-    for _, p in ipairs(Config.ScalePresets) do
-        if p.id == id then return p.value end
-    end
-    return 1.0
-end
-
--- Broadcast scale to all NUIs that opt in (and our own)
 local function broadcastScale()
-    local v = scaleValue(settings.scale)
+    local v = settings.scale
     TriggerEvent('eonexis-ui:scaleChanged', v)
     SendNUIMessage({ action = 'setScale', scale = v })
 end
 
-exports('getScale', function() return scaleValue(settings.scale) end)
+exports('getScale', function() return settings.scale end)
 exports('getToggle', function(id) return settings.toggles[id] end)
 
 -- ── NUI open/close ───────────────────────────────────────────────────────────────
@@ -74,8 +65,6 @@ local function openSettings(firstRun)
         action      = 'open',
         firstRun    = firstRun or false,
         scale       = settings.scale,
-        scaleValue  = scaleValue(settings.scale),
-        presets     = Config.ScalePresets,
         keybinds    = Config.Keybinds,
         toggles     = Config.Toggles,
         toggleState = settings.toggles,
@@ -95,8 +84,10 @@ end
 
 RegisterNUICallback('setScale', function(data, cb)
     cb({})
-    if data.scale then
-        saveScale(data.scale)
+    local v = tonumber(data.value)
+    if v then
+        v = math.max(0.5, math.min(2.0, v))
+        saveScale(v)
         broadcastScale()
     end
 end)
@@ -111,12 +102,10 @@ end)
 
 RegisterNUICallback('openLink', function(data, cb)
     cb({})
-    -- Show the URL as a notification so the player can open it (NUI cannot open browsers)
     local url = data.url or Config.LinkURL
     if exports['eonexis-notify'] then
         exports['eonexis-notify']:Notify('Open in browser', url, 'info', 9000)
     end
-    print('[eonexis-settings] Link requested: ' .. url)
 end)
 
 RegisterNUICallback('finishFirstRun', function(_, cb)
@@ -124,7 +113,7 @@ RegisterNUICallback('finishFirstRun', function(_, cb)
     markConfigured()
     closeSettings()
     if exports['eonexis-notify'] then
-        exports['eonexis-notify']:Notify('Settings', 'Saved! Reopen anytime with F7 or /settings.', 'success', 5000)
+        exports['eonexis-notify']:Notify('Settings', 'Saved! Reopen anytime with F7.', 'success', 5000)
     end
 end)
 
@@ -133,18 +122,15 @@ RegisterNUICallback('close', function(_, cb)
     closeSettings()
 end)
 
--- ── Keybinds (rebindable in GTA Settings ▸ Key Bindings) ──────────────────────────
+-- ── Keybinds ─────────────────────────────────────────────────────────────────────
 
--- /settings + key
 RegisterCommand('settings', function()
     if nuiOpen then closeSettings() else openSettings(false) end
 end, false)
 RegisterKeyMapping('settings', 'Open Settings', 'keyboard', 'F7')
 TriggerEvent('chat:addSuggestion', '/settings', 'Open your player settings')
 
--- ── Controller cursor for NUIs ────────────────────────────────────────────────────
--- When any NUI has focus and the controller-cursor option is on, move the mouse
--- cursor with the right stick and let LB/RB scroll. Works on any NUI page.
+-- ── Controller cursor ────────────────────────────────────────────────────────────
 
 local cursorX, cursorY = 0.5, 0.5
 
@@ -152,22 +138,18 @@ CreateThread(function()
     while true do
         local sleep = 200
         if IsNuiFocused() and settings.toggles.controllerCursor ~= false and IsInputDisabled(2) then
-            -- IsInputDisabled(2) is true when using a controller
             sleep = 0
-            local rx = GetDisabledControlNormal(0, 220) -- right stick X
-            local ry = GetDisabledControlNormal(0, 221) -- right stick Y
+            local rx = GetDisabledControlNormal(0, 220)
+            local ry = GetDisabledControlNormal(0, 221)
             if math.abs(rx) > 0.08 or math.abs(ry) > 0.08 then
                 cursorX = math.max(0.0, math.min(1.0, cursorX + rx * 0.012))
                 cursorY = math.max(0.0, math.min(1.0, cursorY + ry * 0.012))
                 SetCursorLocation(cursorX, cursorY)
-                -- Drive the visual cursor in whichever NUI is listening
                 SendNUIMessage({ action = 'controllerCursor', x = cursorX, y = cursorY })
             end
-            -- A button (201) = left click into NUI at cursor
             if IsDisabledControlJustPressed(0, 201) then
                 SendNUIMessage({ action = 'controllerClick', x = cursorX, y = cursorY })
             end
-            -- B button (202) = back/close
             if IsDisabledControlJustPressed(0, 202) then
                 SendNUIMessage({ action = 'controllerBack' })
             end
@@ -176,21 +158,21 @@ CreateThread(function()
     end
 end)
 
--- ── First-run + init ──────────────────────────────────────────────────────────────
+-- ── Init ─────────────────────────────────────────────────────────────────────────
 
 CreateThread(function()
     loadSettings()
-    -- wait for session
     while not NetworkIsSessionStarted() do Wait(300) end
-    Wait(4000)  -- let spawn/character finish first
+    Wait(4000)
     broadcastScale()
     if isFirstRun() then
         openSettings(true)
     end
 end)
 
--- Re-apply scale whenever a NUI (re)opens and asks for it
-RegisterNetEvent('eonexis-ui:requestScale')
+-- Re-apply scale when any NUI requests it
 AddEventHandler('eonexis-ui:requestScale', function()
     broadcastScale()
 end)
+
+print('[eonexis-settings] loaded — client-side KVP settings, webapp link ready')

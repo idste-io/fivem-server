@@ -88,3 +88,7 @@ function DrawText3D(x, y, z, text)
     DrawText(0.0, 0.0)
     ClearDrawOrigin()
 end
+
+AddEventHandler('eonexis-ui:scaleChanged', function(v)
+    SendNUIMessage({ action = 'setScale', scale = v })
+end)

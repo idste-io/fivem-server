@@ -424,3 +424,7 @@ exports('getLicensePos', function(licId)
     end
     return nil
 end)
+
+AddEventHandler('eonexis-ui:scaleChanged', function(v)
+    SendNUIMessage({ action = 'setScale', scale = v })
+end)

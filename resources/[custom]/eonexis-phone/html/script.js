@@ -252,6 +252,9 @@ window.addEventListener('message', function(e) {
         updateDutyUI();
     } else if (d.action === 'setWorkStatus') {
         document.getElementById('w-status').textContent = d.status || 'No active task';
+    } else if (d.action === 'setScale') {
+        document.body.style.transform = 'scale(' + d.scale + ')';
+        document.body.style.transformOrigin = 'center center';
     } else if (d.action === 'controllerCursor') {
         moveCtrlCursor(d.x, d.y);
     } else if (d.action === 'controllerClick') {

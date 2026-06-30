@@ -37,3 +37,7 @@ RegisterNUICallback('dismiss', function(_, cb)
     SendNUIMessage({ type = 'hide' })
     cb({})
 end)
+
+AddEventHandler('eonexis-ui:scaleChanged', function(v)
+    SendNUIMessage({ action = 'setScale', scale = v })
+end)

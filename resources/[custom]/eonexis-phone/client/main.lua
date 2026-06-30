@@ -235,23 +235,24 @@ RegisterNUICallback('spawnParachute', function(data, cb)
     end
     if not loc then return end
 
-    -- Give parachute and teleport high above location
+    TriggerEvent('eonexis-phone:spawned')  -- anticheat grace
     local ped = PlayerPedId()
     GiveWeaponToPed(ped, GetHashKey('gadget_parachute'), 1, false, true)
     SetEntityCoords(ped, loc.x, loc.y, loc.airZ, false, false, false, true)
-    -- Let gravity take over — player opens chute
 
     notify('Parachute activated! Pull chute with F!', 'info')
 end)
 
 RegisterNUICallback('spawnBuilding', function(data, cb)
     cb({})
+    TriggerEvent('eonexis-phone:spawned')  -- anticheat grace before server teleports us
     TriggerServerEvent('eonexis-phone:buildingSpawn', data.id)
 end)
 
 RegisterNetEvent('eonexis-phone:doSpawn')
 AddEventHandler('eonexis-phone:doSpawn', function(loc)
     closePhone()
+    TriggerEvent('eonexis-phone:spawned')  -- anticheat grace
     local ped = PlayerPedId()
     SetEntityCoords(ped, loc.x, loc.y, loc.z + 0.5, false, false, false, true)
     notify('Spawned at ' .. loc.label, 'success')
@@ -356,6 +357,11 @@ end)
 RegisterNetEvent('eonexis-admintools:setAdminStatus')
 AddEventHandler('eonexis-admintools:setAdminStatus', function(isAdmin)
     SendNUIMessage({ action='setAdmin', isAdmin=isAdmin })
+end)
+
+-- Forward global UI scale changes to phone NUI
+AddEventHandler('eonexis-ui:scaleChanged', function(v)
+    SendNUIMessage({ action = 'setScale', scale = v })
 end)
 
 -- Send character + stats data when phone opens

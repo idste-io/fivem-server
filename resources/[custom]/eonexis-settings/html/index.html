@@ -31,9 +31,19 @@
         <!-- DISPLAY -->
         <div class="tab-pane active" data-pane="display">
           <div class="section-label">UI Scale</div>
-          <p class="hint">Choose how large the on-screen menus and HUD appear.</p>
-          <div id="scale-list" class="scale-list"></div>
-          <div class="scale-preview">Preview: <span id="scale-preview-text">Aa</span></div>
+          <p class="hint">Drag to resize ALL menus and HUD overlays. Takes effect immediately.</p>
+          <div class="scale-slider-row">
+            <span class="scale-label-sm">50%</span>
+            <input type="range" id="scale-slider" min="0.5" max="2.0" step="0.05" value="1.0" />
+            <span class="scale-label-sm">200%</span>
+          </div>
+          <div class="scale-current-row">
+            Current: <span id="scale-pct">100%</span>
+            <button class="scale-reset-btn" id="scale-reset">Reset to 100%</button>
+          </div>
+          <div class="scale-preview-box">
+            <span id="scale-preview-text" style="font-size:16px;font-weight:600;color:#9352DB;">Aa Preview Text</span>
+          </div>
         </div>
 
         <!-- CONTROLS -->

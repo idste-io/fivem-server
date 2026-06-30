@@ -98,18 +98,34 @@ AddEventHandler('eonexis-vehicles:sold', function(model)
     for i, v in ipairs(ownedVehs) do if v == model then table.remove(ownedVehs, i); break end end
 end)
 
+local function Draw3DLabel(x, y, z, text)
+    local onScreen, sx, sy = World3dToScreen2d(x, y, z)
+    if not onScreen then return end
+    local camPos = GetGameplayCamCoords()
+    local dist   = #(camPos - vector3(x, y, z))
+    local scale  = math.min(1 / dist * 3.0, 0.42)
+    SetTextScale(0.0, scale)
+    SetTextFont(4)
+    SetTextColour(255, 255, 255, 240)
+    SetTextDropShadow()
+    SetTextOutline()
+    BeginTextCommandDisplayText('STRING')
+    AddTextComponentSubstringPlayerName(text)
+    EndTextCommandDisplayText(sx, sy)
+end
+
 -- Blips, markers, and proximity
 CreateThread(function()
-    -- Dealership blips
+    -- Dealership blips — always visible on map
     for _, dlr in ipairs(Config.Dealerships) do
         local b = AddBlipForCoord(dlr.pos.x, dlr.pos.y, dlr.pos.z)
         SetBlipSprite(b, dlr.blipIcon); SetBlipScale(b, 0.8); SetBlipColour(b, dlr.blipColour)
-        SetBlipAsShortRange(b, true)
+        SetBlipAsShortRange(b, false)
         BeginTextCommandSetBlipName('STRING'); AddTextComponentSubstringPlayerName(dlr.label); EndTextCommandSetBlipName(b)
     end
-    -- Garage blip
+    -- Garage blip — always visible
     local gb = AddBlipForCoord(Config.GaragePos.x, Config.GaragePos.y, Config.GaragePos.z)
-    SetBlipSprite(gb, 357); SetBlipScale(gb, 0.8); SetBlipColour(gb, 5); SetBlipAsShortRange(gb, true)
+    SetBlipSprite(gb, 357); SetBlipScale(gb, 0.8); SetBlipColour(gb, 5); SetBlipAsShortRange(gb, false)
     BeginTextCommandSetBlipName('STRING'); AddTextComponentSubstringPlayerName('My Garage'); EndTextCommandSetBlipName(gb)
 
     while true do
@@ -122,6 +138,9 @@ CreateThread(function()
             if dist < 60 then
                 DrawMarker(1, dlr.pos.x, dlr.pos.y, dlr.pos.z - 0.5,
                     0,0,0, 0,0,0, 2.5,2.5,0.7, 255,165,0, 120, false, true, 2, false, nil, nil, false)
+            end
+            if dist < 40.0 and dist > 3.0 then
+                Draw3DLabel(dlr.pos.x, dlr.pos.y, dlr.pos.z + 1.5, '🚗 ' .. dlr.label)
             end
             if dist < 3.0 then
                 BeginTextCommandDisplayHelp('STRING')
@@ -138,6 +157,9 @@ CreateThread(function()
         if gDist < 60 then
             DrawMarker(1, Config.GaragePos.x, Config.GaragePos.y, Config.GaragePos.z - 0.5,
                 0,0,0, 0,0,0, 2.5,2.5,0.7, 80,200,80, 120, false, true, 2, false, nil, nil, false)
+        end
+        if gDist < 40.0 and gDist > 3.0 then
+            Draw3DLabel(Config.GaragePos.x, Config.GaragePos.y, Config.GaragePos.z + 1.5, '🅿 My Garage')
         end
         if gDist < 3.0 then
             BeginTextCommandDisplayHelp('STRING')

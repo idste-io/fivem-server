@@ -318,6 +318,30 @@ end)
 
 -- ── Admin App ─────────────────────────────────────────────────────────────────
 
+RegisterNUICallback('adminSpawnVehicle', function(data, cb)
+    cb({})
+    if not isAdmin then return end
+    closePhone()
+    local modelName = tostring(data.model or ''):lower():gsub('%s', '')
+    if modelName == '' then return end
+    local hash = GetHashKey(modelName)
+    RequestModel(hash)
+    local t = 0
+    while not HasModelLoaded(hash) and t < 8000 do Wait(200); t = t + 200 end
+    if not HasModelLoaded(hash) then
+        notify('Model "' .. modelName .. '" not found.', 'error'); return
+    end
+    local ped = PlayerPedId()
+    local pos = GetEntityCoords(ped)
+    local fwd = GetEntityForwardVector(ped)
+    local veh = CreateVehicle(hash, pos.x + fwd.x * 5, pos.y + fwd.y * 5, pos.z, GetEntityHeading(ped), true, false)
+    SetPedIntoVehicle(ped, veh, -1)
+    SetEntityAsNoLongerNeeded(veh)
+    SetModelAsNoLongerNeeded(hash)
+    SetVehicleEngineOn(veh, true, true, false)
+    notify('Spawned ' .. modelName .. ' (admin).', 'success')
+end)
+
 RegisterNUICallback('adminOpenTools', function(_, cb)
     cb({})
     closePhone()
@@ -348,8 +372,9 @@ end)
 
 -- Check admin status and show/hide admin app icon
 RegisterNetEvent('eonexis-admintools:setAdminStatus')
-AddEventHandler('eonexis-admintools:setAdminStatus', function(isAdmin)
-    SendNUIMessage({ action='setAdmin', isAdmin=isAdmin })
+AddEventHandler('eonexis-admintools:setAdminStatus', function(adminFlag)
+    isAdmin = adminFlag
+    SendNUIMessage({ action='setAdmin', isAdmin=adminFlag })
 end)
 
 -- Forward global UI scale changes to phone NUI

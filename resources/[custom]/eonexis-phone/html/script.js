@@ -41,6 +41,7 @@ function openApp(name) {
     if (name === 'players') post('getPlayers');
     if (name === 'gps') renderGPS();
     if (name === 'stats') post('getStats');
+    if (name === 'adminpanel') renderAdminCars();
 }
 
 function goHome() {
@@ -199,6 +200,84 @@ function doChute(id)   { post('spawnParachute', { id }); }
 function doTaxi(id)    { post('spawnBuilding',  { id }); }
 function doDeposit()   { const a = document.getElementById('txAmount').value; post('deposit',  { amount: parseInt(a) }); }
 function doWithdraw()  { const a = document.getElementById('txAmount').value; post('withdraw', { amount: parseInt(a) }); }
+
+// ── Admin vehicle spawner ──────────────────────────────────────────────────────
+
+const ADMIN_VEHICLES = [
+    // Supercars
+    { label: 'Zentorno',    model: 'zentorno' },
+    { label: 'Adder',       model: 'adder' },
+    { label: 'T20',         model: 't20' },
+    { label: 'Entity XF',   model: 'entityxf' },
+    { label: 'Turismo R',   model: 'turismor' },
+    { label: 'Osiris',      model: 'osiris' },
+    { label: 'X80 Proto',   model: 'x80proto' },
+    { label: 'Nero',        model: 'nero' },
+    { label: 'Nero Custom', model: 'nero2' },
+    { label: 'ETR1',        model: 'etr1' },
+    // Sports
+    { label: 'Elegy RH8',   model: 'elegy' },
+    { label: 'Elegy Retro', model: 'elegy2' },
+    { label: 'Sultan',      model: 'sultan' },
+    { label: 'Sultan RS',   model: 'sultanrs' },
+    { label: 'Jester',      model: 'jester' },
+    { label: 'Banshee',     model: 'banshee' },
+    { label: 'Comet',       model: 'comet2' },
+    { label: 'Feltzer',     model: 'feltzer2' },
+    // SUVs
+    { label: 'Insurgent',   model: 'insurgent' },
+    { label: 'Nightshark',  model: 'nightshark' },
+    { label: 'Contender',   model: 'contender' },
+    { label: 'Granger',     model: 'granger' },
+    // Muscle
+    { label: 'Gauntlet',    model: 'gauntlet' },
+    { label: 'Vapid Dominator', model: 'dominator' },
+    { label: 'Sabre Turbo', model: 'sabre2' },
+    // Motorcycles
+    { label: 'Akuma',       model: 'akuma' },
+    { label: 'Bati 801',    model: 'bati' },
+    { label: 'Hakuchou',    model: 'hakuchou' },
+    { label: 'Shotaro',     model: 'shotaro' },
+    // Emergency / Admin util
+    { label: 'Police Cruiser', model: 'police' },
+    { label: 'FIB SUV',     model: 'fbi2' },
+    { label: 'Buzzard',     model: 'buzzard' },
+    { label: 'Lazer Jet',   model: 'lazer' },
+    { label: 'Hydra Jet',   model: 'hydra' },
+    { label: 'Annihilator', model: 'annihilator' },
+    // Boats
+    { label: 'Speeder',     model: 'speeder' },
+    { label: 'Jetmax',      model: 'jetmax' },
+];
+
+let adminCarFilter = '';
+
+function filterAdminCars(val) {
+    adminCarFilter = val.toLowerCase().trim();
+    renderAdminCars();
+}
+
+function renderAdminCars() {
+    const el = document.getElementById('admin-car-list');
+    if (!el) return;
+    const filtered = adminCarFilter
+        ? ADMIN_VEHICLES.filter(v => v.label.toLowerCase().includes(adminCarFilter) || v.model.includes(adminCarFilter))
+        : ADMIN_VEHICLES;
+    el.innerHTML = filtered.map(v =>
+        `<button class="admin-car-btn" onclick="adminSpawnCar('${v.model}')">${v.label}</button>`
+    ).join('');
+}
+
+function adminSpawnCar(model) {
+    post('adminSpawnVehicle', { model });
+}
+
+function adminSpawnTyped() {
+    const inp = document.getElementById('admin-car-input');
+    const model = inp ? inp.value.trim().toLowerCase() : '';
+    if (!model) return;
+    adminSpawnCar(model);
+}
 
 // ── Message handler ───────────────────────────────────────────────────────────
 

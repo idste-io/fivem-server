@@ -183,6 +183,22 @@ RegisterNUICallback('close', function(_, cb)
     SendNUIMessage({ action='hideLicMenu' })
 end)
 
+local function Draw3DLabel(x, y, z, text)
+    local onScreen, sx, sy = World3dToScreen2d(x, y, z)
+    if not onScreen then return end
+    local camPos = GetGameplayCamCoords()
+    local dist   = #(camPos - vector3(x, y, z))
+    local scale  = math.min(1 / dist * 3.0, 0.42)
+    SetTextScale(0.0, scale)
+    SetTextFont(4)
+    SetTextColour(255, 255, 255, 240)
+    SetTextDropShadow()
+    SetTextOutline()
+    BeginTextCommandDisplayText('STRING')
+    AddTextComponentSubstringPlayerName(text)
+    EndTextCommandDisplayText(sx, sy)
+end
+
 -- ── Open job center ────────────────────────────────────────────────────────────
 
 local function openJobCenter()
@@ -243,8 +259,13 @@ CreateThread(function()
 
         -- ── Job center ──────────────────────────────────────────────────────────
         local jcDist = #(myPos - Config.JobCenterPos)
-        DrawMarker(1, Config.JobCenterPos.x, Config.JobCenterPos.y, Config.JobCenterPos.z - 0.5,
-            0,0,0, 0,0,0, 2.2,2.2,0.5, 255,200,0,140, false, true, 2, false, nil, nil, false)
+        if jcDist < 100.0 then
+            DrawMarker(1, Config.JobCenterPos.x, Config.JobCenterPos.y, Config.JobCenterPos.z - 0.5,
+                0,0,0, 0,0,0, 2.2,2.2,0.5, 255,200,0,140, false, true, 2, false, nil, nil, false)
+        end
+        if jcDist < 40.0 and jcDist > 2.5 then
+            Draw3DLabel(Config.JobCenterPos.x, Config.JobCenterPos.y, Config.JobCenterPos.z + 1.5, '💼 Job Center')
+        end
         if jcDist < 2.5 then
             BeginTextCommandDisplayHelp('STRING')
             AddTextComponentSubstringPlayerName('~INPUT_CONTEXT~ Job Center')
@@ -258,8 +279,15 @@ CreateThread(function()
         for _, lic in ipairs(Config.Licenses) do
             local lPos  = lic.pos
             local lDist = #(myPos - lPos)
-            DrawMarker(1, lPos.x, lPos.y, lPos.z - 0.5,
-                0,0,0, 0,0,0, 2.0,2.0,0.5, 80,160,255,120, false, true, 2, false, nil, nil, false)
+            if lDist < 100.0 then
+                DrawMarker(1, lPos.x, lPos.y, lPos.z - 0.5,
+                    0,0,0, 0,0,0, 2.0,2.0,0.5, 80,160,255,120, false, true, 2, false, nil, nil, false)
+            end
+            if lDist < 40.0 and lDist > 2.5 then
+                local owned = hasLicense(lic.id)
+                Draw3DLabel(lPos.x, lPos.y, lPos.z + 1.5,
+                    (owned and '✅ ' or '📋 ') .. lic.label)
+            end
             if lDist < 2.5 then
                 BeginTextCommandDisplayHelp('STRING')
                 AddTextComponentSubstringPlayerName(

@@ -38,12 +38,13 @@ AddEventHandler('gameEventTriggered', function(name, args)
         local isFatal  = args[4]
         if not isFatal then return end
         local ped = PlayerPedId()
-        if victim == ped then
-            -- We died — get our attacker's server ID and report
-            local attackerServerId = GetPlayerServerId(NetworkGetPlayerIndexFromPed(attacker))
-            if attackerServerId and attackerServerId > 0 then
-                TriggerServerEvent('eonexis-bounty:playerKilled', PlayerId())
-            end
+        if victim ~= ped then return end
+        if attacker == 0 or not IsPedAPlayer(attacker) then return end
+        local playerIdx = NetworkGetPlayerIndexFromPed(attacker)
+        if playerIdx == -1 then return end
+        local attackerServerId = GetPlayerServerId(playerIdx)
+        if attackerServerId and attackerServerId > 0 then
+            TriggerServerEvent('eonexis-bounty:playerKilled', PlayerId())
         end
     end
 end)

@@ -81,6 +81,22 @@ AddEventHandler('eonexis-properties:sold', function(propId)
     SendNUIMessage({ action = 'hide' })
 end)
 
+local function Draw3DLabel(x, y, z, text)
+    local onScreen, sx, sy = World3dToScreen2d(x, y, z)
+    if not onScreen then return end
+    local camPos = GetGameplayCamCoords()
+    local dist   = #(camPos - vector3(x, y, z))
+    local scale  = math.min(1 / dist * 3.0, 0.42)
+    SetTextScale(0.0, scale)
+    SetTextFont(4)
+    SetTextColour(255, 255, 255, 240)
+    SetTextDropShadow()
+    SetTextOutline()
+    BeginTextCommandDisplayText('STRING')
+    AddTextComponentSubstringPlayerName(text)
+    EndTextCommandDisplayText(sx, sy)
+end
+
 -- Draw markers and check proximity
 CreateThread(function()
     while true do
@@ -89,12 +105,11 @@ CreateThread(function()
         nearProp = nil
 
         for _, prop in ipairs(Config.Properties) do
-            local dist = #(myPos - prop.blipPos)
+            local dist  = #(myPos - prop.blipPos)
+            local owned = owns(prop.id)
+            local r, g, b = owned and 80 or 255, owned and 200 or 165, owned and 80 or 0
 
-            -- Draw marker when close
-            if dist < 50.0 then
-                local owned = owns(prop.id)
-                local r, g, b = owned and 80 or 255, owned and 200 or 165, owned and 80 or 0
+            if dist < 60.0 then
                 DrawMarker(Config.MarkerType,
                     prop.blipPos.x, prop.blipPos.y, prop.blipPos.z - 0.5,
                     0,0,0, 0,0,0,
@@ -102,19 +117,25 @@ CreateThread(function()
                     r, g, b, 120, false, true, 2, false, nil, nil, false)
             end
 
+            -- 3D floating label visible from 40m
+            if dist < 40.0 and dist > Config.MarkerRadius then
+                local priceTag = owned and '' or (' $' .. prop.price)
+                Draw3DLabel(prop.blipPos.x, prop.blipPos.y, prop.blipPos.z + 1.5,
+                    prop.icon .. ' ' .. prop.label .. priceTag)
+            end
+
             if dist < Config.MarkerRadius then
                 nearProp = prop
                 BeginTextCommandDisplayHelp('STRING')
                 AddTextComponentSubstringPlayerName(
-                    owns(prop.id)
+                    owned
                     and string.format('~INPUT_CONTEXT~ Manage %s', prop.label)
-                    or  string.format('~INPUT_CONTEXT~ View %s (%s$%d)', prop.label, Config.CurrencySymbol or '$', prop.price)
+                    or  string.format('~INPUT_CONTEXT~ View %s ($%d)', prop.label, prop.price)
                 )
                 EndTextCommandDisplayHelp(0, false, true, -1)
             end
         end
 
-        -- E key to open menu
         if nearProp and IsControlJustPressed(0, 38) and not menuOpen then
             openMenu(nearProp)
         end

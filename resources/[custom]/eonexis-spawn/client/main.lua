@@ -60,6 +60,67 @@ function doSpawnAt(sp, label)
     end)
 end
 
+-- ── Respawn system ────────────────────────────────────────────────────────────
+
+local function doRespawn()
+    spawned = false
+    local sp = Config.SpawnPoints[Config.DefaultSpawnIndex]
+    doSpawnAt(sp, 'Hospital')
+    exports['eonexis-notify']:Notify('Respawn', 'You woke up at the hospital.', 'info', 5000)
+end
+
+RegisterCommand('respawn', function()
+    if not IsEntityDead(PlayerPedId()) then
+        exports['eonexis-notify']:Notify('Respawn', 'You are not dead.', 'error', 3000)
+        return
+    end
+    doRespawn()
+end, false)
+
+TriggerEvent('chat:addSuggestion', '/respawn', 'Respawn at the hospital when dead', {})
+
+-- Hold R for 5s when dead to respawn
+local respawnHoldStart = nil
+
+CreateThread(function()
+    while true do
+        Wait(0)
+        local ped = PlayerPedId()
+        if IsEntityDead(ped) then
+            if IsControlPressed(0, 45) then  -- R / INPUT_RELOAD
+                if not respawnHoldStart then respawnHoldStart = GetGameTimer() end
+                local held  = GetGameTimer() - respawnHoldStart
+                local pct   = math.min(held / 5000, 1.0)
+                local remaining = math.ceil((5000 - held) / 1000)
+
+                -- Background track
+                DrawRect(0.5, 0.92, 0.32, 0.018, 30, 30, 50, 180)
+                -- Fill
+                DrawRect(0.5 - (0.32 / 2) + (0.32 * pct / 2), 0.92, 0.32 * pct, 0.018, 100, 180, 255, 220)
+
+                SetTextFont(4); SetTextScale(0, 0.32); SetTextColour(255, 255, 255, 255)
+                SetTextCentre(true); SetTextOutline()
+                BeginTextCommandDisplayText('STRING')
+                AddTextComponentSubstringPlayerName(('Hold R to respawn... %ds'):format(remaining))
+                EndTextCommandDisplayText(0.5, 0.895)
+
+                if held >= 5000 then
+                    respawnHoldStart = nil
+                    doRespawn()
+                end
+            else
+                respawnHoldStart = nil
+                -- Show dead hint
+                BeginTextCommandDisplayHelp('STRING')
+                AddTextComponentSubstringPlayerName('Hold ~INPUT_RELOAD~ for 5s to respawn  |  /respawn')
+                EndTextCommandDisplayHelp(0, false, true, -1)
+            end
+        else
+            respawnHoldStart = nil
+        end
+    end
+end)
+
 AddEventHandler('eonexis-ui:scaleChanged', function(v)
     SendNUIMessage({ action = 'setScale', scale = v })
 end)

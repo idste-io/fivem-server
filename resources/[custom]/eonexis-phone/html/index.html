@@ -256,11 +256,22 @@
       <div class="app-bar"><button onclick="goHome()">←</button><h3>Admin Panel</h3></div>
       <div class="app-body">
         <div class="admin-warning">⚠️ Admin tools — use responsibly. All actions are logged.</div>
-        <button class="full-btn" onclick="post('adminOpenTools')">⚙️ Full Admin Menu</button>
-        <button class="full-btn secondary" onclick="post('adminNoclip')">✈️ Toggle Noclip</button>
-        <button class="full-btn secondary" onclick="post('adminGod')">🛡️ Toggle God Mode</button>
-        <button class="full-btn secondary" onclick="post('adminFreeze')">❄️ Freeze All Players</button>
-        <button class="full-btn secondary" onclick="post('adminTeleportHome')">🏠 Teleport to Spawn</button>
+        <div class="admin-section">
+          <button class="full-btn" onclick="post('adminOpenTools')">⚙️ Full Admin Menu</button>
+          <button class="full-btn secondary" onclick="post('adminNoclip')">✈️ Toggle Noclip</button>
+          <button class="full-btn secondary" onclick="post('adminGod')">🛡️ Toggle God Mode</button>
+          <button class="full-btn secondary" onclick="post('adminFreeze')">❄️ Freeze All Players</button>
+          <button class="full-btn secondary" onclick="post('adminTeleportHome')">🏠 Teleport to Spawn</button>
+        </div>
+        <div class="admin-section" style="margin-top:10px">
+          <div class="admin-section-label">🚗 Spawn Vehicle (Admin Free)</div>
+          <div style="display:flex;gap:6px;margin-bottom:8px">
+            <input type="text" id="admin-car-input" class="admin-car-input"
+              placeholder="Model name (e.g. zentorno)" oninput="filterAdminCars(this.value)">
+            <button class="admin-spawn-btn" onclick="adminSpawnTyped()">Spawn</button>
+          </div>
+          <div id="admin-car-list" class="admin-car-grid"></div>
+        </div>
       </div>
     </div>
 

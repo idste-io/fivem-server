@@ -88,6 +88,22 @@ CreateThread(function()
     end
 end)
 
+-- TAB also opens the phone (suppresses the weapon wheel on TAB while on foot).
+-- Control 37 = INPUT_SELECT_WEAPON (TAB). Vehicle weapon wheel is left untouched.
+CreateThread(function()
+    while true do
+        Wait(0)
+        local ped = PlayerPedId()
+        if not IsPedInAnyVehicle(ped, false) then
+            DisableControlAction(0, 37, true)
+            if IsDisabledControlJustPressed(0, 37) then
+                if phoneOpen then closePhone() else openPhone() end
+                Wait(300)
+            end
+        end
+    end
+end)
+
 -- Receive economy data updates
 RegisterNetEvent('eonexis-economy:updateCash')
 AddEventHandler('eonexis-economy:updateCash', function(v)

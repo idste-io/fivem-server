@@ -17,7 +17,7 @@ Config.DefaultScale = 'normal'
 -- Rebindable key actions (RegisterKeyMapping → players rebind in GTA Settings ▸ Key Bindings)
 -- command name must be unique server-wide; the chat command is also registered.
 Config.Keybinds = {
-    { command = 'phone',     label = 'Open Phone',        default = 'P'  },
+    { command = 'phone',     label = 'Open Phone',        default = 'P / TAB' },
     { command = 'settings',  label = 'Open Settings',     default = 'F7' },
     { command = 'quests',    label = 'Open Quests',       default = 'F6' },
     { command = 'rules',     label = 'Open Rules',        default = 'F2' },

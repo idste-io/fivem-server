@@ -5,7 +5,7 @@ local bountyMap = {}  -- { [license] = amount }
 -- Refresh bounty list every 60s
 CreateThread(function()
     while true do
-        TriggerNetEvent('eonexis-bounty:requestList')
+        TriggerServerEvent('eonexis-bounty:requestList')
         Wait(60000)
     end
 end)
@@ -42,7 +42,7 @@ AddEventHandler('gameEventTriggered', function(name, args)
             -- We died — get our attacker's server ID and report
             local attackerServerId = GetPlayerServerId(NetworkGetPlayerIndexFromPed(attacker))
             if attackerServerId and attackerServerId > 0 then
-                TriggerNetEvent('eonexis-bounty:playerKilled', PlayerId())
+                TriggerServerEvent('eonexis-bounty:playerKilled', PlayerId())
             end
         end
     end

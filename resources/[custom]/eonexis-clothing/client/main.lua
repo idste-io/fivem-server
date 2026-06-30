@@ -79,7 +79,7 @@ RegisterNUICallback('save', function(data, cb)
     exports['eonexis-notify']:Notify('Wardrobe', 'Outfit saved!', 'success', 3000)
     -- Tell server to charge if applicable
     if Config.ChangeCost > 0 then
-        TriggerNetEvent('eonexis-clothing:pay', Config.ChangeCost)
+        TriggerServerEvent('eonexis-clothing:pay', Config.ChangeCost)
     end
     cb({})
 end)

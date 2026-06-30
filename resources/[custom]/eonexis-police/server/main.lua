@@ -60,17 +60,13 @@ end
 RegisterCommand('duty', function(src)
     if not isPolice(src) then notify(src, 'Police only.', 'error'); return end
     if onDuty[src] then
-        TriggerNetEvent('eonexis-police:setDuty', false)
-    else
-        TriggerEvent('eonexis-police:setDuty', false)  -- handled via event with correct source
-    end
-    onDuty[src] = not onDuty[src]
-    if onDuty[src] then
-        TriggerClientEvent('eonexis-police:dutyOn', src)
-        notify(src, '🚔 On duty.', 'success')
-    else
+        onDuty[src] = nil
         TriggerClientEvent('eonexis-police:dutyOff', src)
         notify(src, 'Off duty.', 'info')
+    else
+        onDuty[src] = true
+        TriggerClientEvent('eonexis-police:dutyOn', src)
+        notify(src, '🚔 On duty. /cuff /jail /911 available.', 'success')
     end
     TriggerClientEvent('eonexis-police:officerUpdate', -1, getOnDutyList())
 end, false)

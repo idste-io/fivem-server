@@ -48,7 +48,7 @@ end)
 function openCraftingNUI()
     nuiOpen = true
     SetNuiFocus(true, true)
-    TriggerNetEvent('eonexis-crafting:requestRecipes')
+    TriggerServerEvent('eonexis-crafting:requestRecipes')
 end
 
 RegisterNetEvent('eonexis-crafting:receiveRecipes')
@@ -57,10 +57,10 @@ AddEventHandler('eonexis-crafting:receiveRecipes', function(recipes, inv)
 end)
 
 RegisterNUICallback('craft', function(data, cb)
-    TriggerNetEvent('eonexis-crafting:craft', data.recipeId)
+    TriggerServerEvent('eonexis-crafting:craft', data.recipeId)
     -- Brief delay then refresh inventory display
     Citizen.SetTimeout(1500, function()
-        TriggerNetEvent('eonexis-crafting:requestRecipes')
+        TriggerServerEvent('eonexis-crafting:requestRecipes')
     end)
     cb({})
 end)

@@ -23,7 +23,7 @@ end)
 
 -- Main thread: markers + proximity check
 CreateThread(function()
-    TriggerNetEvent('eonexis-banking:requestCooldowns')
+    TriggerServerEvent('eonexis-banking:requestCooldowns')
     while true do
         local ped   = PlayerPedId()
         local pos   = GetEntityCoords(ped)
@@ -65,7 +65,7 @@ function startHeist(bank)
     if inHeist then return end
     inHeist  = true
     heistBank = bank.id
-    TriggerNetEvent('eonexis-banking:startHeist', bank.id)
+    TriggerServerEvent('eonexis-banking:startHeist', bank.id)
 end
 
 -- Server approved heist start
@@ -83,7 +83,7 @@ AddEventHandler('eonexis-banking:begin', function(bankId, duration)
             Wait(interval)
             elapsed = (GetGameTimer() - startTime) / 1000
             if elapsed >= duration then
-                TriggerNetEvent('eonexis-banking:heistDone', heistBank)
+                TriggerServerEvent('eonexis-banking:heistDone', heistBank)
                 inHeist  = false
                 heistBank = nil
                 return
@@ -94,7 +94,7 @@ AddEventHandler('eonexis-banking:begin', function(bankId, duration)
                 local dist = #(GetEntityCoords(ped) - bk.pos)
                 if dist > 20.0 then
                     -- Left the zone, abort
-                    TriggerNetEvent('eonexis-banking:heistAbort', bankId)
+                    TriggerServerEvent('eonexis-banking:heistAbort', bankId)
                     exports['eonexis-notify']:Notify('Bank Heist', 'Vault breach cancelled — you fled!', 'error', 4000)
                     inHeist  = false
                     heistBank = nil

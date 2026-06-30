@@ -52,7 +52,6 @@ local function spawnPolicePedAt(wp)
     if not DoesEntityExist(ped) then return end
     SetPedAsGroupMember(ped, 0)
     SetBlockingOfNonTemporaryEvents(ped, false)
-    TaskPatrolRoute(ped)
     TaskWanderInArea(ped, wp.x, wp.y, wp.z, 40.0, 1.0, 0)
     GiveWeaponToPed(ped, GetHashKey('WEAPON_PISTOL'), 100, false, true)
     table.insert(policeNPCs, ped)

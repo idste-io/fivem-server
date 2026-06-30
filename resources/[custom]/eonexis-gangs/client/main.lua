@@ -62,7 +62,7 @@ end)
 
 -- Territory capture zone + prompt
 CreateThread(function()
-    TriggerNetEvent('eonexis-gangs:requestData')
+    TriggerServerEvent('eonexis-gangs:requestData')
     while true do
         local ped = PlayerPedId()
         local pos = GetEntityCoords(ped)
@@ -92,7 +92,7 @@ CreateThread(function()
                         else
                             local elapsed = (GetGameTimer() - capturing.startTime) / 1000
                             if elapsed >= Config.CaptureTime then
-                                TriggerNetEvent('eonexis-gangs:captureTerritory', t.id)
+                                TriggerServerEvent('eonexis-gangs:captureTerritory', t.id)
                                 capturing = nil
                             end
                         end
@@ -110,7 +110,7 @@ end)
 RegisterCommand('gc', function(args)
     local msg = table.concat(args, ' ')
     if #msg < 1 then return end
-    TriggerNetEvent('eonexis-gangs:chat', msg)
+    TriggerServerEvent('eonexis-gangs:chat', msg)
 end, false)
 
 TriggerEvent('chat:addSuggestion', '/gang', 'Gang commands', {{ name='subcommand', help='create/join/leave/info/list/stash/deposit/withdraw' }})

@@ -150,7 +150,7 @@ end)
 
 RegisterNUICallback('quitJob', function(_, cb)
     cb({})
-    TriggerNetEvent('eonexis-jobs:quitJob')
+    TriggerServerEvent('eonexis-jobs:quitJob')
     closePhone()
 end)
 
@@ -186,7 +186,7 @@ end)
 -- Police duty toggle from phone
 RegisterNUICallback('toggleDuty', function(_, cb)
     cb({})
-    TriggerNetEvent('eonexis-police:setDuty', not dutyOn)
+    TriggerServerEvent('eonexis-police:setDuty', not dutyOn)
     dutyOn = not dutyOn
     SendNUIMessage({ action='setDuty', dutyOn=dutyOn })
 end)

@@ -24,7 +24,7 @@ end)
 
 RegisterCommand('duty', function()
     local job = 'police' -- resolved server-side, but guard locally
-    TriggerNetEvent('eonexis-police:setDuty', not onDuty)
+    TriggerServerEvent('eonexis-police:setDuty', not onDuty)
 end, false)
 
 RegisterNetEvent('eonexis-police:dutyOn')

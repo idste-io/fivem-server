@@ -48,7 +48,7 @@ CreateThread(function()
                         exports['eonexis-notify']:Notify('Drug Lab', 'Press [E] to start ' .. lab.product .. ' production', 'info', 2000)
                         if IsControlJustPressed(0, 38) then
                             producing = true
-                            TriggerNetEvent('eonexis-drugs:startProd', lab.id)
+                            TriggerServerEvent('eonexis-drugs:startProd', lab.id)
                         end
                     end
                 end
@@ -85,7 +85,7 @@ function showSellMenu()
     local inv = {}
     local drugs = { 'weed', 'cocaine', 'meth' }
     -- Check inventory via server
-    TriggerNetEvent('eonexis-drugs:requestInventory')
+    TriggerServerEvent('eonexis-drugs:requestInventory')
 end
 
 -- Server sends inventory, show what can be sold
@@ -96,7 +96,7 @@ AddEventHandler('eonexis-drugs:receiveInventory', function(inv)
         if (inv[drug] or 0) > 0 then
             hasDrugs = true
             -- Auto-sell all drugs
-            TriggerNetEvent('eonexis-drugs:sell', drug)
+            TriggerServerEvent('eonexis-drugs:sell', drug)
         end
     end
     if not hasDrugs then
@@ -111,7 +111,7 @@ AddEventHandler('eonexis-drugs:prodBegin', function(labId, duration)
     exports['eonexis-notify']:Notify('Lab', ('Processing... %ds. Stay nearby!'):format(duration), 'warning', duration * 1000)
     CreateThread(function()
         Wait(duration * 1000)
-        TriggerNetEvent('eonexis-drugs:prodDone', labId)
+        TriggerServerEvent('eonexis-drugs:prodDone', labId)
         producing = false
     end)
 end)
@@ -125,5 +125,5 @@ end)
 -- Handle sell inventory request response
 RegisterNetEvent('eonexis-drugs:doSell')
 AddEventHandler('eonexis-drugs:doSell', function(drugId)
-    TriggerNetEvent('eonexis-drugs:sell', drugId)
+    TriggerServerEvent('eonexis-drugs:sell', drugId)
 end)

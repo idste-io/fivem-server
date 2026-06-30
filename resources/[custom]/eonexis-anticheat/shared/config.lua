@@ -9,4 +9,4 @@ Config.LogToConsole    = true
 -- Notify Discord admin channel via bot HTTP API
 Config.NotifyDiscord   = true
 Config.BotHttpPort     = 3001
-Config.BotSecret       = 'eonexis_bot_secret_2024_xK9mQ'
+Config.BotSecret       = 'bBZRalUXXicn65H1nWb-_UNVHUTD4TjK'

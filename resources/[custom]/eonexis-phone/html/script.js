@@ -202,6 +202,15 @@ function doWithdraw()  { const a = document.getElementById('txAmount').value; po
 
 // ── Message handler ───────────────────────────────────────────────────────────
 
+function updateHomeStats() {
+    const c = document.getElementById('hud-cash'); if (c) c.textContent = '$' + state.cash.toLocaleString();
+    const b = document.getElementById('hud-bank'); if (b) b.textContent = '$' + state.bank.toLocaleString();
+    const j = document.getElementById('hud-job');  if (j) j.textContent = state.job || 'unemployed';
+    // also update balance card total
+    const t = document.getElementById('b-total');
+    if (t) t.textContent = '$' + (state.cash + state.bank).toLocaleString();
+}
+
 window.addEventListener('message', function(e) {
     const d = e.data;
     if (d.action === 'open') {
@@ -210,6 +219,7 @@ window.addEventListener('message', function(e) {
         if (d.jobs)     allJobs = d.jobs;
         if (d.licDefs)  allLicenses = d.licDefs;
         refreshJobApps();
+        updateHomeStats();
         document.getElementById('phone').classList.remove('hidden');
         goHome();
     } else if (d.action === 'close') {
@@ -218,6 +228,7 @@ window.addEventListener('message', function(e) {
         state.cash = d.cash; state.bank = d.bank;
         document.getElementById('b-cash').textContent = '$' + d.cash.toLocaleString();
         document.getElementById('b-bank').textContent = '$' + d.bank.toLocaleString();
+        updateHomeStats();
     } else if (d.action === 'updateJob') {
         state.job = d.job;
         state.licenses = d.licenses || state.licenses;
@@ -230,7 +241,11 @@ window.addEventListener('message', function(e) {
     } else if (d.action === 'showPlayers') {
         const el = document.getElementById('player-list');
         el.innerHTML = d.players.map(p =>
-            `<div class="player-row"><span class="player-id">[${p.id}]</span> ${p.name}</div>`
+            `<div class="player-row">
+              <div class="player-avatar">${p.name.charAt(0).toUpperCase()}</div>
+              <span class="player-name">${p.name}</span>
+              <span class="player-id">#${p.id}</span>
+            </div>`
         ).join('') || '<p class="hint">No players online.</p>';
     } else if (d.action === 'setCharData') {
         if (d.char) {

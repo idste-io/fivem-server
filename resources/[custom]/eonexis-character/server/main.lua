@@ -106,7 +106,7 @@ AddEventHandler('eonexis-character:save', function(data)
                 gender  = db[id].gender,
                 server_id = src,
             }),
-            { ['Content-Type'] = 'application/json', ['X-Bot-Secret'] = 'eonexis_bot_secret_2024_xK9mQ' })
+            { ['Content-Type'] = 'application/json', ['X-Bot-Secret'] = 'bBZRalUXXicn65H1nWb-_UNVHUTD4TjK' })
     else
         notify(src, 'Character updated.', 'success')
     end

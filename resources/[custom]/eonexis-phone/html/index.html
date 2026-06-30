@@ -8,55 +8,132 @@
 <body>
 <div id="phone" class="hidden">
   <div class="screen">
+
+    <!-- Dynamic island placeholder (styled via CSS ::before) -->
     <div class="status-bar">
       <span id="clock">12:00</span>
-      <span class="signal">●●●●</span>
-    </div>
-
-    <!-- HOME SCREEN -->
-    <div id="home-screen" class="app-screen active">
-      <div class="wallpaper-logo">EONEXIS</div>
-      <div class="app-grid" id="app-grid">
-        <!-- Core apps always visible -->
-        <button class="app-icon" onclick="openApp('spawn')">    <div class="icon">🪂</div><div class="lbl">Spawn</div>      </button>
-        <button class="app-icon" onclick="openApp('bank')">     <div class="icon">💰</div><div class="lbl">Bank</div>       </button>
-        <button class="app-icon" onclick="openApp('jobboard')"> <div class="icon">💼</div><div class="lbl">Jobs</div>       </button>
-        <button class="app-icon" onclick="openApp('players')">  <div class="icon">👥</div><div class="lbl">Players</div>    </button>
-        <button class="app-icon" onclick="openApp('inv')">      <div class="icon">📦</div><div class="lbl">Inventory</div> </button>
-        <button class="app-icon" onclick="openApp('gps')">      <div class="icon">🗺️</div><div class="lbl">GPS</div>        </button>
-        <button class="app-icon" onclick="openApp('character')"><div class="icon">🧑</div><div class="lbl">Character</div></button>
-        <button class="app-icon" onclick="openApp('quests')">   <div class="icon">📜</div><div class="lbl">Quests</div>    </button>
-        <button class="app-icon" onclick="openApp('stats')">    <div class="icon">📊</div><div class="lbl">Stats</div>     </button>
-        <!-- Job-specific apps (hidden unless on that job) -->
-        <button id="app-work-btn" class="app-icon hidden" onclick="openApp('work')">       <div class="icon">⚒️</div><div class="lbl">Work</div>       </button>
-        <button id="app-police-btn" class="app-icon hidden" onclick="openApp('policeapp')"><div class="icon">🚔</div><div class="lbl">Police</div>     </button>
-        <!-- Admin (admin-only) -->
-        <button id="admin-app-btn" class="app-icon hidden" onclick="openApp('adminpanel')"><div class="icon">🛡️</div><div class="lbl">Admin</div>      </button>
+      <div class="status-right">
+        <div class="status-signal"><span></span><span></span><span></span><span></span></div>
+        <div class="status-battery"><div class="battery-fill"></div></div>
       </div>
-      <button class="close-phone" onclick="post('close')">✕ Close</button>
     </div>
 
-    <!-- SPAWN APP -->
+    <!-- ── HOME ─────────────────────────────────────────────────────────── -->
+    <div id="home-screen" class="app-screen active">
+      <div class="home-header">
+        <div class="home-logo">Eonexis RP</div>
+        <div class="home-greeting">My Phone</div>
+      </div>
+
+      <!-- Quick stats -->
+      <div class="home-stats">
+        <div class="hstat">
+          <div class="hstat-label">Cash</div>
+          <div class="hstat-val" id="hud-cash">$0</div>
+        </div>
+        <div class="hstat">
+          <div class="hstat-label">Bank</div>
+          <div class="hstat-val purple" id="hud-bank">$0</div>
+        </div>
+        <div class="hstat">
+          <div class="hstat-label">Job</div>
+          <div class="hstat-val purple" id="hud-job">—</div>
+        </div>
+      </div>
+
+      <!-- App grid -->
+      <div class="app-grid" id="app-grid">
+        <button class="app-icon" onclick="openApp('spawn')">
+          <div class="icon-bg ic-purple">🪂</div><div class="lbl">Spawn</div>
+        </button>
+        <button class="app-icon" onclick="openApp('bank')">
+          <div class="icon-bg ic-green">💳</div><div class="lbl">Bank</div>
+        </button>
+        <button class="app-icon" onclick="openApp('jobboard')">
+          <div class="icon-bg ic-blue">💼</div><div class="lbl">Jobs</div>
+        </button>
+        <button class="app-icon" onclick="openApp('gps')">
+          <div class="icon-bg ic-teal">🗺️</div><div class="lbl">GPS</div>
+        </button>
+        <button class="app-icon" onclick="openApp('inv')">
+          <div class="icon-bg ic-gold">🎒</div><div class="lbl">Inventory</div>
+        </button>
+        <button class="app-icon" onclick="openApp('players')">
+          <div class="icon-bg ic-indigo">👥</div><div class="lbl">Players</div>
+        </button>
+        <button class="app-icon" onclick="openApp('character')">
+          <div class="icon-bg ic-pink">🧑</div><div class="lbl">Character</div>
+        </button>
+        <button class="app-icon" onclick="openApp('quests')">
+          <div class="icon-bg ic-olive">📜</div><div class="lbl">Quests</div>
+        </button>
+        <button class="app-icon" onclick="openApp('stats')">
+          <div class="icon-bg ic-red">📊</div><div class="lbl">Stats</div>
+        </button>
+        <!-- Job-specific -->
+        <button id="app-work-btn" class="app-icon hidden" onclick="openApp('work')">
+          <div class="icon-bg ic-gold">⚒️</div><div class="lbl">Work</div>
+        </button>
+        <button id="app-police-btn" class="app-icon hidden" onclick="openApp('policeapp')">
+          <div class="icon-bg ic-blue">🚔</div><div class="lbl">Police</div>
+        </button>
+        <!-- Admin -->
+        <button id="admin-app-btn" class="app-icon hidden" onclick="openApp('adminpanel')">
+          <div class="icon-bg ic-red">🛡️</div><div class="lbl">Admin</div>
+        </button>
+      </div>
+
+      <!-- Bottom close pill -->
+      <div class="phone-dock">
+        <button class="dock-btn" onclick="openApp('spawn')">
+          <div class="dock-icon">🪂</div><div class="dock-lbl">Spawn</div>
+        </button>
+        <button class="dock-btn" onclick="post('close')" style="opacity:1">
+          <div class="dock-icon" style="font-size:28px;color:rgba(255,255,255,0.3)">⬤</div>
+          <div class="dock-lbl">Close</div>
+        </button>
+        <button class="dock-btn" onclick="openApp('bank')">
+          <div class="dock-icon">💳</div><div class="dock-lbl">Bank</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── SPAWN ─────────────────────────────────────────────────────────── -->
     <div id="app-spawn" class="app-screen">
       <div class="app-bar"><button onclick="goHome()">←</button><h3>Fast Travel</h3></div>
       <div class="app-body" id="spawn-list"></div>
     </div>
 
-    <!-- BANK APP -->
+    <!-- ── BANK ──────────────────────────────────────────────────────────── -->
     <div id="app-bank" class="app-screen">
       <div class="app-bar"><button onclick="goHome()">←</button><h3>Maze Bank</h3></div>
       <div class="app-body">
-        <div class="bank-row"><span>Cash</span><strong id="b-cash">$0</strong></div>
-        <div class="bank-row"><span>Bank</span><strong id="b-bank">$0</strong></div>
-        <div class="bank-input">
-          <input type="number" id="txAmount" placeholder="Amount" min="1">
-          <button onclick="doDeposit()">Deposit</button>
-          <button onclick="doWithdraw()">Withdraw</button>
+        <div class="balance-card">
+          <div class="balance-label">Total Balance</div>
+          <div class="balance-amount" id="b-total">$0</div>
+          <hr class="balance-divider">
+          <div class="balance-row">
+            <div>
+              <div class="bal-item-lbl">Cash on Hand</div>
+              <div class="bal-item-val cash" id="b-cash">$0</div>
+            </div>
+            <div style="text-align:right">
+              <div class="bal-item-lbl">Bank Balance</div>
+              <div class="bal-item-val bank" id="b-bank">$0</div>
+            </div>
+          </div>
+        </div>
+        <div class="tx-card">
+          <input type="number" id="txAmount" placeholder="Amount ($)" min="1">
+          <div class="tx-row">
+            <button class="tx-btn deposit" onclick="doDeposit()">↑ Deposit</button>
+            <button class="tx-btn withdraw" onclick="doWithdraw()">↓ Withdraw</button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- JOB BOARD APP -->
+    <!-- ── JOB BOARD ─────────────────────────────────────────────────────── -->
     <div id="app-jobboard" class="app-screen">
       <div class="app-bar"><button onclick="goHome()">←</button><h3>Job Board</h3></div>
       <div class="tab-row">
@@ -64,112 +141,129 @@
         <button class="tab-btn" onclick="switchJobTab('licenses')">Licenses</button>
       </div>
       <div class="app-body">
-        <div id="jb-current-row" class="bank-row" style="margin-bottom:10px">
-          <span>Current Job</span><strong id="j-current">unemployed</strong>
+        <div class="card" style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;padding:10px 14px">
+          <span style="font-size:11px;color:var(--muted)">Current Job</span>
+          <strong id="j-current" style="color:var(--p);font-size:13px">unemployed</strong>
         </div>
-        <!-- Listing tab -->
-        <div id="jb-listing" class="jb-tab active">
-          <div id="job-list"></div>
-        </div>
-        <!-- Licenses tab -->
-        <div id="jb-licenses" class="jb-tab hidden">
-          <div id="license-list"></div>
-        </div>
+        <div id="jb-listing" class="jb-tab active"><div id="job-list"></div></div>
+        <div id="jb-licenses" class="jb-tab hidden"><div id="license-list"></div></div>
       </div>
     </div>
 
-    <!-- WORK APP (visible when employed, not police) -->
+    <!-- ── WORK ──────────────────────────────────────────────────────────── -->
     <div id="app-work" class="app-screen">
       <div class="app-bar"><button onclick="goHome()">←</button><h3 id="work-app-title">Work</h3></div>
       <div class="app-body">
-        <div class="bank-row"><span>Job</span><strong id="w-job">—</strong></div>
-        <div class="bank-row" style="align-items:flex-start"><span>Status</span><span id="w-status" style="text-align:right;font-size:12px;max-width:65%;opacity:.8">No active task</span></div>
+        <div class="card">
+          <div class="card-row"><span>Job</span><strong id="w-job" class="purple">—</strong></div>
+          <div class="card-row"><span>Status</span><span id="w-status" style="font-size:12px;color:var(--muted);text-align:right;max-width:65%">No active task</span></div>
+        </div>
         <button class="full-btn" onclick="post('requestWork')">▶ Get Next Task</button>
         <button class="full-btn secondary" onclick="doQuitJob()">🚪 Quit Job</button>
-        <p class="hint">Complete tasks to earn money and skill XP.</p>
+        <p class="hint">Complete tasks to earn money and level up your skills.</p>
       </div>
     </div>
 
-    <!-- POLICE APP (police job only) -->
+    <!-- ── POLICE ─────────────────────────────────────────────────────────── -->
     <div id="app-policeapp" class="app-screen">
-      <div class="app-bar"><button onclick="goHome()">←</button><h3>Police</h3></div>
+      <div class="app-bar"><button onclick="goHome()">←</button><h3>LSPD</h3></div>
       <div class="app-body">
-        <div class="bank-row"><span>Status</span><strong id="police-duty-status">Off Duty</strong></div>
+        <div class="card">
+          <div class="card-row"><span>Duty Status</span><strong id="police-duty-status">🔴 Off Duty</strong></div>
+        </div>
         <button class="full-btn" onclick="post('toggleDuty')" id="duty-toggle-btn">▶ Go On Duty</button>
-        <button class="full-btn secondary" onclick="goHome(); post('close')">📻 Open Radio (/radio)</button>
         <button class="full-btn secondary" onclick="post('view911Log')">🚨 911 Log</button>
-        <p class="hint">Use /cuff /jail /911 /radio in-game.</p>
+        <p class="hint">Use /cuff /jail /911 /radio in chat.</p>
       </div>
     </div>
 
-    <!-- PLAYERS APP -->
+    <!-- ── PLAYERS ────────────────────────────────────────────────────────── -->
     <div id="app-players" class="app-screen">
       <div class="app-bar"><button onclick="goHome()">←</button><h3>Online Players</h3></div>
       <div class="app-body" id="player-list"><p class="hint">Loading...</p></div>
     </div>
 
-    <!-- INVENTORY APP -->
+    <!-- ── INVENTORY ─────────────────────────────────────────────────────── -->
     <div id="app-inv" class="app-screen">
       <div class="app-bar"><button onclick="goHome()">←</button><h3>Inventory</h3></div>
       <div class="app-body">
-        <button class="full-btn" onclick="post('openInventory')">Open Full Inventory</button>
-        <p class="hint">Opens the inventory overlay (TAB key also works).</p>
+        <button class="full-btn" onclick="post('openInventory')">📦 Open Full Inventory</button>
+        <p class="hint">You can also press TAB to open your inventory overlay.</p>
       </div>
     </div>
 
-    <!-- GPS APP -->
+    <!-- ── GPS ───────────────────────────────────────────────────────────── -->
     <div id="app-gps" class="app-screen">
-      <div class="app-bar"><button onclick="goHome()">←</button><h3>GPS</h3></div>
-      <div class="app-body" id="gps-list"></div>
+      <div class="app-bar"><button onclick="goHome()">←</button><h3>GPS Navigation</h3></div>
+      <div class="app-body" id="gps-list"><p class="hint">No GPS points available.</p></div>
     </div>
 
-    <!-- CHARACTER APP -->
+    <!-- ── CHARACTER ─────────────────────────────────────────────────────── -->
     <div id="app-character" class="app-screen">
       <div class="app-bar"><button onclick="goHome()">←</button><h3>Character</h3></div>
       <div class="app-body">
-        <div id="char-info" style="padding:8px 0">
-          <div class="bank-row"><span>Name</span><strong id="char-name-ph">—</strong></div>
-          <div class="bank-row"><span>Gender</span><strong id="char-gender-ph">—</strong></div>
-          <div class="bank-row"><span>Outfit</span><strong id="char-outfit-ph">—</strong></div>
-          <div class="bank-row" style="align-items:flex-start"><span>Bio</span><em id="char-bio-ph" style="text-align:right;font-size:11px;max-width:60%;opacity:0.7">—</em></div>
+        <div class="card">
+          <div class="card-row"><span>Name</span><strong id="char-name-ph">—</strong></div>
+          <div class="card-row"><span>Gender</span><strong id="char-gender-ph">—</strong></div>
+          <div class="card-row"><span>Outfit</span><strong id="char-outfit-ph">—</strong></div>
+          <div class="card-row"><span>Bio</span><em id="char-bio-ph" style="color:var(--muted);font-size:11px">—</em></div>
         </div>
         <button class="full-btn" onclick="post('openCharacterCreator')">✏️ Edit Character</button>
         <p class="hint">Name changes cost $500 after first creation.</p>
       </div>
     </div>
 
-    <!-- QUESTS APP -->
+    <!-- ── QUESTS ─────────────────────────────────────────────────────────── -->
     <div id="app-quests" class="app-screen">
       <div class="app-bar"><button onclick="goHome()">←</button><h3>Quests</h3></div>
       <div class="app-body">
         <button class="full-btn" onclick="post('openQuests')">📜 Open Quest Log</button>
-        <p class="hint">You can also press Q to open the quest log.</p>
+        <p class="hint">Complete quests to earn rewards and XP. Press Q to open anytime.</p>
       </div>
     </div>
 
-    <!-- STATS APP -->
+    <!-- ── STATS ──────────────────────────────────────────────────────────── -->
     <div id="app-stats" class="app-screen">
       <div class="app-bar"><button onclick="goHome()">←</button><h3>My Stats</h3></div>
       <div class="app-body">
-        <div class="bank-row"><span>Cash</span><strong id="stat-cash">—</strong></div>
-        <div class="bank-row"><span>Bank</span><strong id="stat-bank">—</strong></div>
-        <div class="bank-row"><span>Job</span><strong id="stat-job">—</strong></div>
-        <div class="bank-row"><span>Skill Level</span><strong id="stat-skill">—</strong></div>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-icon">💵</div>
+            <div class="stat-val" id="stat-cash">—</div>
+            <div class="stat-lbl">Cash</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🏦</div>
+            <div class="stat-val" id="stat-bank">—</div>
+            <div class="stat-lbl">Bank</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">💼</div>
+            <div class="stat-val" id="stat-job" style="font-size:13px">—</div>
+            <div class="stat-lbl">Job</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⭐</div>
+            <div class="stat-val" id="stat-skill">1</div>
+            <div class="stat-lbl">Skill Level</div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- ADMIN APP -->
+    <!-- ── ADMIN ──────────────────────────────────────────────────────────── -->
     <div id="app-adminpanel" class="app-screen">
       <div class="app-bar"><button onclick="goHome()">←</button><h3>Admin Panel</h3></div>
       <div class="app-body">
-        <button class="full-btn" onclick="post('adminOpenTools')">⚙️ Admin Tools</button>
-        <button class="full-btn" onclick="post('adminNoclip')">✈️ Toggle Noclip</button>
-        <button class="full-btn" onclick="post('adminGod')">🛡️ Toggle God Mode</button>
-        <button class="full-btn" onclick="post('adminFreeze')">❄️ Freeze All Players</button>
-        <button class="full-btn" onclick="post('adminTeleportHome')">🏠 Teleport to Spawn</button>
-        <p class="hint" style="color:#e74c3c">Admin-only. Only visible to admins.</p>
+        <div class="admin-warning">⚠️ Admin tools — use responsibly. All actions are logged.</div>
+        <button class="full-btn" onclick="post('adminOpenTools')">⚙️ Full Admin Menu</button>
+        <button class="full-btn secondary" onclick="post('adminNoclip')">✈️ Toggle Noclip</button>
+        <button class="full-btn secondary" onclick="post('adminGod')">🛡️ Toggle God Mode</button>
+        <button class="full-btn secondary" onclick="post('adminFreeze')">❄️ Freeze All Players</button>
+        <button class="full-btn secondary" onclick="post('adminTeleportHome')">🏠 Teleport to Spawn</button>
       </div>
     </div>
+
   </div>
 </div>
 <script src="script.js"></script>

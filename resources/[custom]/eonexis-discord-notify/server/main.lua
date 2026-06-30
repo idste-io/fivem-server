@@ -3,7 +3,7 @@
 -- The webhook was replaced by the eonexis-bot; this now calls the bot's event endpoint.
 
 local BOT_URL    = 'http://127.0.0.1:3001/event'
-local BOT_SECRET = 'eonexis_bot_secret_2024_xK9mQ'  -- must match BOT_SECRET in eonexis-bot .env
+local BOT_SECRET = 'bBZRalUXXicn65H1nWb-_UNVHUTD4TjK'  -- must match BOT_SECRET in eonexis-bot .env
 
 local function getPlayerCount()
     return #GetPlayers()

@@ -22,8 +22,11 @@ echo "[eonexis-fivem] repo synced"
 cp "$REPO_DIR/server.cfg" "$SERVER_DIR/server.cfg"
 
 # Sync all resources (system + custom mods)
+# --filter='protect ...' keeps runtime data/*.json on the server even when not in GitHub
 rsync -av --delete \
   --exclude='.gitkeep' \
+  --filter='protect [custom]/*/data/*.json' \
+  --filter='protect [custom]/*/data/*.txt' \
   "$REPO_DIR/resources/" "$SERVER_DIR/resources/"
 echo "[eonexis-fivem] resources synced"
 

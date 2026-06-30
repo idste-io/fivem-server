@@ -1,7 +1,6 @@
 -- loading-screen — client
--- The manifest uses `loadscreen_manual_shutdown 'yes'`, so the loading screen will
--- stay up FOREVER unless we explicitly dismiss it. This dismisses it once the
--- player's session has started, with a hard safety timeout as a fallback.
+-- loadscreen_manual_shutdown 'yes' means the screen NEVER closes unless we call
+-- ShutdownLoadingScreenNui(). We call it from three separate paths so it always fires.
 
 local dismissed = false
 
@@ -9,28 +8,34 @@ local function dismiss()
     if dismissed then return end
     dismissed = true
     ShutdownLoadingScreenNui()
+    print('[loading-screen] dismissed')
 end
 
+-- Path 1: as soon as game type starts (most reliable on vanilla FiveM)
+AddEventHandler('onClientGameTypeStart', function()
+    Wait(2000)  -- small buffer so spawn NUI can mount
+    dismiss()
+end)
+
+-- Path 2: once network session is established
 CreateThread(function()
-    -- Wait until the network session is actually started
     local waited = 0
     while not NetworkIsSessionStarted() do
         Wait(200)
         waited = waited + 200
-        if waited > 60000 then break end  -- safety: never wait more than 60s
+        if waited > 45000 then break end
     end
-    -- Let the spawn selector NUI mount first so there's no black flash
     Wait(500)
     dismiss()
 end)
 
--- Hard fallback: no matter what, dismiss after 90 seconds so nobody is ever stuck
+-- Path 3: absolute hard fallback — 60 seconds no matter what
 CreateThread(function()
-    Wait(90000)
+    Wait(60000)
     dismiss()
 end)
 
--- Allow other resources to force-dismiss the loading screen
+-- Allow other resources or server to force-dismiss
 RegisterNetEvent('loading-screen:dismiss')
 AddEventHandler('loading-screen:dismiss', dismiss)
 exports('dismiss', dismiss)
